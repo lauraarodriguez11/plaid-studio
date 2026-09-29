@@ -12,6 +12,12 @@ let fabrics = [
   { id: "C3", name: "C3 (A1+C1 English Toffee)", hex: "#8c5e39" }
 ];
 
+// Mapa de prioridades para ordenar la tabla exactamente como en la lista de telas
+const fabricOrderMap = fabrics.reduce((acc, f, index) => {
+  acc[f.id] = index;
+  return acc;
+}, {});
+
 let activeFabricId = "A1";
 
 // 2. Bandas del bloque en CENTÍMETROS (cm)
@@ -90,7 +96,7 @@ function changeColorHex(id, hex) {
   updateAll();
 }
 
-// UI: Controles de bandas (exclusivamente en cm)
+// UI: Controles de bandas en cm
 function renderStripControls() {
   const container = document.getElementById("stripControls");
   container.innerHTML = strips.map((s, idx) => `
@@ -110,7 +116,7 @@ function updateStripWidth(idx, val) {
   updateAll();
 }
 
-// Dibujar Canvas
+// Dibujar Canvas y mostrar dimensiones (Bloque y Quilt Completo)
 function drawCanvas() {
   const canvas = document.getElementById("quiltCanvas");
   const ctx = canvas.getContext("2d");
@@ -123,11 +129,12 @@ function drawCanvas() {
     `Total: ${totalBlocks} bloque${totalBlocks > 1 ? 's' : ''} (${repX} × ${repY})`;
 
   const blockDimCm = strips.reduce((acc, s) => acc + s.width, 0);
-  document.getElementById("blockSizeDisplay").textContent = 
-    `Bloque: ${blockDimCm.toFixed(1)} × ${blockDimCm.toFixed(1)} cm`;
-
   const totalWCm = blockDimCm * repX;
   const totalHCm = blockDimCm * repY;
+
+  // Actualización de la dimensión del bloque y del quilt completo
+  document.getElementById("blockSizeDisplay").textContent = 
+    `Bloque: ${blockDimCm.toFixed(1)} × ${blockDimCm.toFixed(1)} cm | Quilt: ${totalWCm.toFixed(1)} × ${totalHCm.toFixed(1)} cm`;
 
   const maxViewportPx = 520;
   const pxPerCm = Math.min(maxViewportPx / totalWCm, maxViewportPx / totalHCm);
@@ -201,7 +208,7 @@ document.getElementById("quiltCanvas").addEventListener("click", function (evt) 
   updateAll();
 });
 
-// Despiece métrico en centímetros (sin pulgadas)
+// Despiece métrico ordenado según la paleta de colores oficial
 function calculateCuts() {
   const seamCm = parseFloat(document.getElementById("seamAllowance").value) || 0.75;
   const repX = parseInt(document.getElementById("repeatX").value) || 2;
@@ -227,6 +234,8 @@ function calculateCuts() {
           fabricId,
           finishedCm: `${sortedFinCm[0].toFixed(1)} × ${sortedFinCm[1].toFixed(1)} cm`,
           cutCm: `${cutDimsCm[0].toFixed(1)} × ${cutDimsCm[1].toFixed(1)} cm`,
+          dimW: sortedFinCm[0],
+          dimH: sortedFinCm[1],
           qty: 0
         };
       }
@@ -234,8 +243,17 @@ function calculateCuts() {
     }
   }
 
+  // Ordenar primero por la posición oficial de la tela y luego por tamaño
+  const sortedPieces = Object.values(pieces).sort((a, b) => {
+    const orderA = fabricOrderMap[a.fabricId] !== undefined ? fabricOrderMap[a.fabricId] : 999;
+    const orderB = fabricOrderMap[b.fabricId] !== undefined ? fabricOrderMap[b.fabricId] : 999;
+    if (orderA !== orderB) return orderA - orderB;
+    if (a.dimW !== b.dimW) return a.dimW - b.dimW;
+    return a.dimH - b.dimH;
+  });
+
   const tbody = document.getElementById("cutListBody");
-  tbody.innerHTML = Object.values(pieces).map(item => {
+  tbody.innerHTML = sortedPieces.map(item => {
     const f = fabrics.find(fab => fab.id === item.fabricId) || { name: item.fabricId, hex: "#ccc" };
     return `
       <tr>
