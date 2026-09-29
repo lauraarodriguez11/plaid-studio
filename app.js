@@ -15,7 +15,6 @@ let fabrics = [
 let activeFabricId = "A1";
 
 // 2. Bandas del bloque en CENTÍMETROS (cm)
-// Equivalencias de diseño para un bloque terminado de aprox. 32 cm
 let strips = [
   { id: "BG", label: "Banda 1 (BG)", width: 6.5 },
   { id: "A1", label: "Banda 2 (A1)", width: 2.5 },
@@ -28,7 +27,7 @@ let strips = [
 // Matriz de celdas [fila][columna] = fabricId
 let blockMatrix = [];
 
-// Regla de color de cruces oficial de Petite Plaid
+// Regla de combinación de colores oficial de Petite Plaid
 function resolveColorRole(rowStripId, colStripId) {
   if (rowStripId === "BG" && colStripId === "BG") return "BG";
   if (rowStripId === "BG") return colStripId;
@@ -91,7 +90,7 @@ function changeColorHex(id, hex) {
   updateAll();
 }
 
-// UI: Controles de bandas (en cm)
+// UI: Controles de bandas (exclusivamente en cm)
 function renderStripControls() {
   const container = document.getElementById("stripControls");
   container.innerHTML = strips.map((s, idx) => `
@@ -202,7 +201,7 @@ document.getElementById("quiltCanvas").addEventListener("click", function (evt) 
   updateAll();
 });
 
-// Despiece métrico en centímetros
+// Despiece métrico en centímetros (sin pulgadas)
 function calculateCuts() {
   const seamCm = parseFloat(document.getElementById("seamAllowance").value) || 0.75;
   const repX = parseInt(document.getElementById("repeatX").value) || 2;
@@ -247,7 +246,7 @@ function calculateCuts() {
           </div>
         </td>
         <td><strong>${item.finishedCm}</strong></td>
-        <td><span class="cut-highlight">${item.cutCm}</span></td>
+        <td><strong class="cut-highlight">${item.cutCm}</strong></td>
         <td>${item.qty} ud.</td>
         <td><strong>${item.qty * totalBlocks} ud.</strong></td>
       </tr>

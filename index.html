@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Petite Plaid Studio</title>
+  <title>Plaid Studio</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,12 +12,12 @@
 </head>
 <body>
 
-  <!-- Barra de navegación estilo macOS con enlace oficial -->
+  <!-- Barra superior -->
   <header class="app-header">
     <div class="header-inner">
       <div class="brand">
         <span class="apple-dot"></span>
-        <h1>Petite Plaid Studio</h1>
+        <h1>Plaid Studio</h1>
       </div>
       <div class="header-meta">
         <a href="https://www.loandbeholdstitchery.com/blogs/lo-and-behold/petite-plaid-quilt-pattern-all-the-details?utm_source=Pinterest&utm_medium=organic" 
@@ -34,10 +34,9 @@
   <!-- Espacio de trabajo -->
   <main class="app-layout">
     
-    <!-- Barra lateral (Inspector) -->
     <aside class="sidebar">
       
-      <!-- Color Key (10 Telas) -->
+      <!-- Color Key -->
       <section class="card">
         <div class="card-header">
           <h2>Color Key (10 Telas)</h2>
@@ -59,7 +58,7 @@
         <div id="stripControls" class="strip-list"></div>
       </section>
 
-      <!-- Ajustes de Costura y Repetición de Bloques -->
+      <!-- Ajustes del Quilt -->
       <section class="card">
         <div class="card-header">
           <h2>Configuración del Quilt</h2>
@@ -85,9 +84,9 @@
 
     </aside>
 
-    <!-- Lienzo central y Ficha de corte métrica -->
     <section class="canvas-stage">
       
+      <!-- Canvas interactivo -->
       <div class="card canvas-card">
         <div class="canvas-toolbar">
           <div>
@@ -102,7 +101,7 @@
         </div>
       </div>
 
-      <!-- Tabla de despiece métrica -->
+      <!-- Plan de corte en cm -->
       <div class="card table-card">
         <div class="card-header">
           <h2>Plan de Corte de Piezas (cm)</h2>
@@ -127,6 +126,7 @@
 
   </main>
 
-  <script src="app.js"></script>
+  <!-- Parámetro de versión para forzar actualización de caché -->
+  <script src="app.js?v=2.0"></script>
 </body>
 </html>
