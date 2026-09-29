@@ -1,18 +1,18 @@
-// 1. Las 10 Telas Oficiales de Petite Plaid (Paleta de portada: Pure Solids de AGF)
+// 1. Las 10 Telas Oficiales identificadas únicamente por su código de rol
 let fabrics = [
-  { id: "BG", name: "BG (Golden Bronze)", hex: "#bc8a5f" },
-  { id: "A1", name: "A1 (Honey)", hex: "#d99b38" },
-  { id: "A2", name: "A2 (A1+A1 Forget-Me-Not)", hex: "#7a9cb8" },
-  { id: "A3", name: "A3 (A1+B1 Grapefruit)", hex: "#e27863" },
-  { id: "B1", name: "B1 (Rock Candy)", hex: "#cb4f69" },
-  { id: "B2", name: "B2 (B1+B1 Flamingo)", hex: "#e07a5f" },
-  { id: "B3", name: "B3 (B1+C1 Nutmeg)", hex: "#9e4c27" },
-  { id: "C1", name: "C1 (Forest Night)", hex: "#2b4138" },
-  { id: "C2", name: "C2 (C1+C1 Caviar)", hex: "#1d2a24" },
-  { id: "C3", name: "C3 (A1+C1 English Toffee)", hex: "#8c5e39" }
+  { id: "BG", name: "BG", hex: "#bc8a5f" },
+  { id: "A1", name: "A1", hex: "#d99b38" },
+  { id: "A2", name: "A2", hex: "#7a9cb8" },
+  { id: "A3", name: "A3", hex: "#e27863" },
+  { id: "B1", name: "B1", hex: "#cb4f69" },
+  { id: "B2", name: "B2", hex: "#e07a5f" },
+  { id: "B3", name: "B3", hex: "#9e4c27" },
+  { id: "C1", name: "C1", hex: "#2b4138" },
+  { id: "C2", name: "C2", hex: "#1d2a24" },
+  { id: "C3", name: "C3", hex: "#8c5e39" }
 ];
 
-// Mapa de prioridades para ordenar la tabla exactamente como en la lista de telas
+// Mapa de prioridades para mantener la tabla en orden estricto de roles
 const fabricOrderMap = fabrics.reduce((acc, f, index) => {
   acc[f.id] = index;
   return acc;
@@ -30,16 +30,16 @@ let strips = [
   { id: "C1", label: "Banda 6 (C1)", width: 5.0 }
 ];
 
-// Matriz de celdas [fila][columna] = fabricId
+// Matriz interna [fila][columna] = fabricId
 let blockMatrix = [];
 
-// Regla de combinación de colores oficial de Petite Plaid
+// Regla de color de cruces oficial de Petite Plaid
 function resolveColorRole(rowStripId, colStripId) {
   if (rowStripId === "BG" && colStripId === "BG") return "BG";
   if (rowStripId === "BG") return colStripId;
   if (colStripId === "BG") return rowStripId;
 
-  // Intersecciones puras
+  // Intersecciones del mismo grupo
   if (rowStripId === "A1" && colStripId === "A1") return "A2";
   if (rowStripId === "B1" && colStripId === "B1") return "B2";
   if (rowStripId === "C1" && colStripId === "C1") return "C2";
@@ -53,7 +53,6 @@ function resolveColorRole(rowStripId, colStripId) {
   return "BG";
 }
 
-// Inicializar la matriz con la estructura oficial
 function initializeMatrix() {
   const n = strips.length;
   blockMatrix = [];
@@ -66,7 +65,7 @@ function initializeMatrix() {
   }
 }
 
-// UI: Paleta de telas
+// UI: Paleta con códigos limpios
 function renderPalette() {
   const container = document.getElementById("palette");
   container.innerHTML = fabrics.map(f => `
@@ -116,7 +115,7 @@ function updateStripWidth(idx, val) {
   updateAll();
 }
 
-// Dibujar Canvas y mostrar dimensiones (Bloque y Quilt Completo)
+// Dibujar Canvas y actualizar medidas de Bloque y Quilt
 function drawCanvas() {
   const canvas = document.getElementById("quiltCanvas");
   const ctx = canvas.getContext("2d");
@@ -132,7 +131,6 @@ function drawCanvas() {
   const totalWCm = blockDimCm * repX;
   const totalHCm = blockDimCm * repY;
 
-  // Actualización de la dimensión del bloque y del quilt completo
   document.getElementById("blockSizeDisplay").textContent = 
     `Bloque: ${blockDimCm.toFixed(1)} × ${blockDimCm.toFixed(1)} cm | Quilt: ${totalWCm.toFixed(1)} × ${totalHCm.toFixed(1)} cm`;
 
@@ -172,7 +170,7 @@ function drawCanvas() {
   }
 }
 
-// Clic interactivo sobre cualquier parche para reemplazar el color
+// Interacción por clic en celda
 document.getElementById("quiltCanvas").addEventListener("click", function (evt) {
   const rect = this.getBoundingClientRect();
   const clickX = evt.clientX - rect.left;
@@ -208,7 +206,7 @@ document.getElementById("quiltCanvas").addEventListener("click", function (evt) 
   updateAll();
 });
 
-// Despiece métrico ordenado según la paleta de colores oficial
+// Despiece métrico ordenado y etiquetado solo por código de rol
 function calculateCuts() {
   const seamCm = parseFloat(document.getElementById("seamAllowance").value) || 0.75;
   const repX = parseInt(document.getElementById("repeatX").value) || 2;
@@ -243,7 +241,6 @@ function calculateCuts() {
     }
   }
 
-  // Ordenar primero por la posición oficial de la tela y luego por tamaño
   const sortedPieces = Object.values(pieces).sort((a, b) => {
     const orderA = fabricOrderMap[a.fabricId] !== undefined ? fabricOrderMap[a.fabricId] : 999;
     const orderB = fabricOrderMap[b.fabricId] !== undefined ? fabricOrderMap[b.fabricId] : 999;
