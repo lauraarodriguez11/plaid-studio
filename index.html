@@ -11,7 +11,6 @@
 </head>
 <body>
 
-  <!-- Barra de navegación superior estilo macOS/iOS -->
   <header class="app-header">
     <div class="header-inner">
       <div class="brand">
@@ -19,76 +18,73 @@
         <h1>Petite Plaid Studio</h1>
       </div>
       <div class="header-meta">
-        <span class="badge">Patchwork Métrico (cm)</span>
+        <span class="badge">Estructura Oficial Lo & Behold (10 Telas)</span>
       </div>
     </div>
   </header>
 
-  <!-- Espacio de trabajo -->
   <main class="app-layout">
     
-    <!-- Barra lateral de controles (Inspector) -->
+    <!-- BARRA LATERAL (INSPECTOR) -->
     <aside class="sidebar">
       
-      <!-- Telas y Paleta -->
+      <!-- Paleta y Relaciones de Color -->
       <section class="card">
         <div class="card-header">
-          <h2>Paleta de Telas</h2>
-          <span class="hint-pill">Clic para activar</span>
+          <h2>Color Key (10 Telas)</h2>
+          <span class="hint-pill">Clic para pintar</span>
         </div>
+        <p class="formula-info">
+          A1+A1=A2 | B1+B1=B2 | C1+C1=C2<br>
+          A1+B1=A3 | B1+C1=B3 | A1+C1=C3
+        </p>
         <div id="palette" class="palette-grid"></div>
-        <div class="add-fabric-row">
-          <input type="text" id="newColorName" placeholder="Nombre de tela..." />
-          <input type="color" id="newColorHex" value="#b85d38" />
-          <button id="btnAddColor" class="btn-secondary">Añadir</button>
-        </div>
       </section>
 
-      <!-- Dimensiones y bandas -->
+      <!-- Bandas del Bloque en Pulgadas -->
       <section class="card">
         <div class="card-header">
           <h2>Bandas del Bloque</h2>
-          <span class="subtext">Medidas en cm</span>
+          <span class="subtext">Medidas en Pulgadas (in)</span>
         </div>
         <div id="stripControls" class="strip-list"></div>
-        <button id="btnAddStrip" class="btn-subtle">+ Añadir Franja</button>
       </section>
 
-      <!-- Configuración del quilt -->
+      <!-- Ajustes de Costura y Quilt -->
       <section class="card">
         <div class="card-header">
-          <h2>Ajustes de Ensamblaje</h2>
+          <h2>Configuración del Quilt</h2>
         </div>
         
         <div class="form-group">
-          <label for="seamAllowance">Margen de costura (cm)</label>
-          <input type="number" id="seamAllowance" value="0.75" step="0.05" min="0" />
+          <label for="seamAllowance">Margen de costura (in standard: 0.25")</label>
+          <input type="number" id="seamAllowance" value="0.25" step="0.05" min="0" />
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label for="repeatX">Repeticiones Horiz.</label>
-            <input type="number" id="repeatX" value="2" min="1" max="12" />
+            <label for="repeatX">Bloques Horiz.</label>
+            <input type="number" id="repeatX" value="2" min="1" max="10" />
           </div>
           <div class="form-group">
-            <label for="repeatY">Repeticiones Vert.</label>
-            <input type="number" id="repeatY" value="2" min="1" max="12" />
+            <label for="repeatY">Bloques Vert.</label>
+            <input type="number" id="repeatY" value="2" min="1" max="10" />
           </div>
         </div>
       </section>
 
     </aside>
 
-    <!-- Lienzo central y ficha de corte -->
+    <!-- LIENZO Y TABLA DE CORTE EN CM -->
     <section class="canvas-stage">
       
       <div class="card canvas-card">
         <div class="canvas-toolbar">
           <div>
             <h2>Lienzo del Quilt</h2>
-            <p class="canvas-status">Haz clic en cualquier pieza para pintar con: <strong id="activeColorLabel"></strong></p>
+            <p class="canvas-status">Pintar celda con tela activa: <strong id="activeColorLabel"></strong></p>
           </div>
-          <div class="zoom-indicator" id="blockSizeDisplay">Bloque: -- cm</div>
+          <div class="zoom-indicator" id="blockSizeDisplay">Bloque: --</div>
         </div>
         
         <div class="canvas-viewport">
@@ -96,17 +92,17 @@
         </div>
       </div>
 
-      <!-- Tabla de despiece de corte -->
+      <!-- Plan de corte expresado en cm -->
       <div class="card table-card">
         <div class="card-header">
-          <h2>Plan de Corte de Piezas</h2>
+          <h2>Plan de Corte de Piezas (Medidas en cm)</h2>
         </div>
         <div class="table-responsive">
           <table class="apple-table">
             <thead>
               <tr>
-                <th>Tela</th>
-                <th>Dimensión Acabada</th>
+                <th>Tela (Rol)</th>
+                <th>Dimensión Acabada (cm)</th>
                 <th>Dimensión de Corte (+ márgenes)</th>
                 <th>Por Bloque</th>
                 <th>Total Quilt</th>
