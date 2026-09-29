@@ -1,4 +1,4 @@
-// Paleta inicial basada en el estilo Petite Plaid
+// Paleta basada en Petite Plaid
 let fabrics = [
   { id: "bg", name: "Fondo (Cream)", hex: "#f5edd6" },
   { id: "c1", name: "Honey (A1)", hex: "#d99b38" },
@@ -10,17 +10,17 @@ let fabrics = [
 
 let activeFabricId = fabrics[1].id;
 
-// Secuencia de bandas del bloque (dimensiones terminadas en pulgadas)
+// Secuencia en centímetros (bloque terminado de ~33 cm / 13 pulgadas)
 let strips = [
-  { width: 2.5 }, // Banda 0: Fondo
-  { width: 1.0 }, // Banda 1: Acento
-  { width: 3.0 }, // Banda 2: Central
-  { width: 1.0 }, // Banda 3: Acento
-  { width: 2.5 }, // Banda 4: Fondo
-  { width: 2.5 }  // Banda 5: Secundario
+  { width: 6.0 }, // Franja 1
+  { width: 2.5 }, // Franja 2
+  { width: 8.0 }, // Franja central
+  { width: 2.5 }, // Franja 4
+  { width: 7.0 }, // Franja 5
+  { width: 7.0 }  // Franja 6
 ];
 
-// Matriz de celdas del bloque [fila][columna] = fabricId
+// Matriz interna de colores por celda
 let blockMatrix = [];
 
 function initializeMatrix() {
@@ -43,16 +43,18 @@ function initializeMatrix() {
   }
 }
 
-// Interfaz: Render de Paleta
+// UI: Renderizado de la Paleta
 function renderPalette() {
   const container = document.getElementById("palette");
   container.innerHTML = fabrics.map(f => `
     <div class="palette-item ${f.id === activeFabricId ? 'active' : ''}" onclick="selectActiveFabric('${f.id}')">
-      <div>
+      <div class="palette-color-preview">
         <span class="color-dot" style="background:${f.hex}"></span>
         <span>${f.name}</span>
       </div>
-      <input type="color" value="${f.hex}" onchange="changeColorHex('${f.id}', this.value)" onclick="event.stopPropagation()" />
+      <input type="color" class="color-picker-input" value="${f.hex}" 
+             onchange="changeColorHex('${f.id}', this.value)" 
+             onclick="event.stopPropagation()" />
     </div>
   `).join("");
 
@@ -71,21 +73,24 @@ function changeColorHex(id, hex) {
   updateAll();
 }
 
-// Interfaz: Controles de bandas
+// UI: Renderizado de Controles de Bandas (en cm)
 function renderStripControls() {
   const container = document.getElementById("stripControls");
   container.innerHTML = strips.map((s, idx) => `
     <div class="strip-item">
-      <span>Banda #${idx + 1}:</span>
-      <input type="number" step="0.25" min="0.5" value="${s.width}" onchange="updateStripWidth(${idx}, parseFloat(this.value))" />
-      <span>in</span>
-      ${strips.length > 2 ? `<button onclick="removeStrip(${idx})" style="background:#e53e3e; padding: 2px 6px;">×</button>` : ''}
+      <span>Banda #${idx + 1}</span>
+      <div class="strip-inputs">
+        <input type="number" step="0.5" min="1.0" value="${s.width}" 
+               onchange="updateStripWidth(${idx}, parseFloat(this.value))" />
+        <span style="color: var(--text-secondary); font-size: 0.75rem;">cm</span>
+        ${strips.length > 2 ? `<button class="btn-icon-del" onclick="removeStrip(${idx})">×</button>` : ''}
+      </div>
     </div>
   `).join("");
 }
 
 function updateStripWidth(idx, val) {
-  strips[idx].width = isNaN(val) ? 1.0 : val;
+  strips[idx].width = isNaN(val) || val <= 0 ? 1.0 : val;
   updateAll();
 }
 
@@ -98,9 +103,8 @@ function removeStrip(idx) {
 }
 
 function addStrip() {
-  strips.push({ width: 1.5 });
+  strips.push({ width: 4.0 });
   const n = strips.length;
-  // Ajustar matriz
   blockMatrix.forEach(row => row.push(activeFabricId));
   const newRow = new Array(n).fill(activeFabricId);
   blockMatrix.push(newRow);
@@ -108,43 +112,47 @@ function addStrip() {
   updateAll();
 }
 
-// Dibujo Canvas y detección de clics
+// Renderizado del Canvas y medidas
 function drawCanvas() {
   const canvas = document.getElementById("quiltCanvas");
   const ctx = canvas.getContext("2d");
   const repX = parseInt(document.getElementById("repeatX").value) || 1;
   const repY = parseInt(document.getElementById("repeatY").value) || 1;
 
-  const blockDim = strips.reduce((acc, s) => acc + s.width, 0);
-  const totalW = blockDim * repX;
-  const totalH = blockDim * repY;
+  const blockDimCm = strips.reduce((acc, s) => acc + s.width, 0);
+  document.getElementById("blockSizeDisplay").textContent = `Bloque: ${blockDimCm.toFixed(1)} × ${blockDimCm.toFixed(1)} cm`;
 
-  const maxCanvasSize = 520;
-  const scale = Math.min(maxCanvasSize / totalW, maxCanvasSize / totalH);
+  const totalWCm = blockDimCm * repX;
+  const totalHCm = blockDimCm * repY;
 
-  canvas.width = totalW * scale;
-  canvas.height = totalH * scale;
+  // Escala en píxeles por centímetro
+  const maxViewportPx = 540;
+  const pxPerCm = Math.min(maxViewportPx / totalWCm, maxViewportPx / totalHCm);
+
+  canvas.width = totalWCm * pxPerCm;
+  canvas.height = totalHCm * pxPerCm;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   for (let by = 0; by < repY; by++) {
     for (let bx = 0; bx < repX; bx++) {
-      let offsetY = by * blockDim * scale;
+      let offsetY = by * blockDimCm * pxPerCm;
 
       for (let r = 0; r < strips.length; r++) {
-        const rowH = strips[r].width * scale;
-        let offsetX = bx * blockDim * scale;
+        const rowH = strips[r].width * pxPerCm;
+        let offsetX = bx * blockDimCm * pxPerCm;
 
         for (let c = 0; c < strips.length; c++) {
-          const colW = strips[c].width * scale;
+          const colW = strips[c].width * pxPerCm;
           const fabricId = blockMatrix[r][c];
           const fabric = fabrics.find(f => f.id === fabricId) || fabrics[0];
 
           ctx.fillStyle = fabric.hex;
           ctx.fillRect(offsetX, offsetY, colW, rowH);
 
-          // Borde sutil simulando costuras
-          ctx.strokeStyle = "rgba(0, 0, 0, 0.12)";
+          // Línea de costura nítida
+          ctx.strokeStyle = "rgba(0, 0, 0, 0.08)";
+          ctx.lineWidth = 1;
           ctx.strokeRect(offsetX, offsetY, colW, rowH);
 
           offsetX += colW;
@@ -155,7 +163,7 @@ function drawCanvas() {
   }
 }
 
-// Asignar color al hacer clic sobre cualquier pieza
+// Interacción: Clic sobre cualquier parche para pintar
 document.getElementById("quiltCanvas").addEventListener("click", function (evt) {
   const rect = this.getBoundingClientRect();
   const clickX = evt.clientX - rect.left;
@@ -163,16 +171,15 @@ document.getElementById("quiltCanvas").addEventListener("click", function (evt) 
 
   const repX = parseInt(document.getElementById("repeatX").value) || 1;
   const repY = parseInt(document.getElementById("repeatY").value) || 1;
-  const blockDim = strips.reduce((acc, s) => acc + s.width, 0);
-  const scale = Math.min(520 / (blockDim * repX), 520 / (blockDim * repY));
+  const blockDimCm = strips.reduce((acc, s) => acc + s.width, 0);
+  const pxPerCm = Math.min(540 / (blockDimCm * repX), 540 / (blockDimCm * repY));
 
-  // Determinar posición relativa dentro del bloque
-  const xInInches = (clickX / scale) % blockDim;
-  const yInInches = (clickY / scale) % blockDim;
+  const xInCm = (clickX / pxPerCm) % blockDimCm;
+  const yInCm = (clickY / pxPerCm) % blockDimCm;
 
   let accumX = 0, targetCol = 0;
   for (let c = 0; c < strips.length; c++) {
-    if (xInInches >= accumX && xInInches < accumX + strips[c].width) {
+    if (xInCm >= accumX && xInCm < accumX + strips[c].width) {
       targetCol = c;
       break;
     }
@@ -181,21 +188,20 @@ document.getElementById("quiltCanvas").addEventListener("click", function (evt) 
 
   let accumY = 0, targetRow = 0;
   for (let r = 0; r < strips.length; r++) {
-    if (yInInches >= accumY && yInInches < accumY + strips[r].width) {
+    if (yInCm >= accumY && yInCm < accumY + strips[r].width) {
       targetRow = r;
       break;
     }
     accumY += strips[r].width;
   }
 
-  // Actualizar color en el bloque
   blockMatrix[targetRow][targetCol] = activeFabricId;
   updateAll();
 });
 
-// Despiece y medidas de corte
+// Cálculo métrico de corte
 function calculateCuts() {
-  const seam = parseFloat(document.getElementById("seamAllowance").value) || 0.25;
+  const seam = parseFloat(document.getElementById("seamAllowance").value) || 0.75;
   const repX = parseInt(document.getElementById("repeatX").value) || 1;
   const repY = parseInt(document.getElementById("repeatY").value) || 1;
   const totalBlocks = repX * repY;
@@ -211,13 +217,13 @@ function calculateCuts() {
       const sortedFin = [wFin, hFin].sort((a, b) => a - b);
       const cutDims = sortedFin.map(dim => dim + 2 * seam);
 
-      const key = `${fabricId}_${sortedFin[0].toFixed(2)}x${sortedFin[1].toFixed(2)}`;
+      const key = `${fabricId}_${sortedFin[0].toFixed(1)}x${sortedFin[1].toFixed(1)}`;
 
       if (!pieces[key]) {
         pieces[key] = {
           fabricId,
-          finished: `${sortedFin[0]}" × ${sortedFin[1]}"`,
-          cut: `${cutDims[0].toFixed(2)}" × ${cutDims[1].toFixed(2)}"`,
+          finished: `${sortedFin[0].toFixed(1)} × ${sortedFin[1].toFixed(1)} cm`,
+          cut: `${cutDims[0].toFixed(1)} × ${cutDims[1].toFixed(1)} cm`,
           qty: 0
         };
       }
@@ -230,9 +236,14 @@ function calculateCuts() {
     const f = fabrics.find(fab => fab.id === item.fabricId) || { name: item.fabricId, hex: "#ccc" };
     return `
       <tr>
-        <td><span class="color-dot" style="background:${f.hex}"></span> <strong>${f.name}</strong></td>
+        <td>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="color-dot" style="background:${f.hex}"></span>
+            <strong>${f.name}</strong>
+          </div>
+        </td>
         <td>${item.finished}</td>
-        <td><strong>${item.cut}</strong></td>
+        <td><strong style="color:var(--apple-blue);">${item.cut}</strong></td>
         <td>${item.qty} ud.</td>
         <td><strong>${item.qty * totalBlocks} ud.</strong></td>
       </tr>
@@ -245,7 +256,7 @@ function updateAll() {
   calculateCuts();
 }
 
-// Inicialización de eventos
+// Event Listeners
 document.getElementById("btnAddColor").addEventListener("click", () => {
   const name = document.getElementById("newColorName").value.trim();
   const hex = document.getElementById("newColorHex").value;
@@ -262,7 +273,7 @@ document.getElementById("seamAllowance").addEventListener("input", updateAll);
 document.getElementById("repeatX").addEventListener("input", updateAll);
 document.getElementById("repeatY").addEventListener("input", updateAll);
 
-// Arranque
+// Inicialización
 initializeMatrix();
 renderPalette();
 renderStripControls();
