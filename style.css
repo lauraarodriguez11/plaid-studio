@@ -62,13 +62,23 @@ body {
   font-weight: 600;
 }
 
-.badge {
-  font-size: 0.75rem;
+.badge-link {
+  font-size: 0.78rem;
   font-weight: 500;
-  color: var(--text-secondary);
-  background: rgba(0, 0, 0, 0.05);
-  padding: 4px 10px;
+  color: var(--apple-blue);
+  background: rgba(0, 113, 227, 0.08);
+  padding: 6px 12px;
   border-radius: 20px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-link:hover {
+  background: rgba(0, 113, 227, 0.16);
+  color: var(--apple-blue-hover);
 }
 
 .app-layout {
@@ -105,7 +115,7 @@ body {
 }
 
 .formula-info {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   color: var(--text-secondary);
   background: rgba(0, 0, 0, 0.03);
   padding: 6px 8px;
@@ -198,7 +208,7 @@ body {
 }
 
 .strip-inputs input {
-  width: 60px;
+  width: 65px;
   text-align: right;
 }
 
@@ -221,7 +231,7 @@ input[type="number"]:focus {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .form-group label {
@@ -234,6 +244,13 @@ input[type="number"]:focus {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+}
+
+.blocks-summary {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  font-weight: 500;
 }
 
 .canvas-toolbar {
@@ -273,7 +290,7 @@ input[type="number"]:focus {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 460px;
+  min-height: 480px;
   overflow: auto;
 }
 
@@ -311,11 +328,4 @@ canvas {
 .cut-highlight {
   color: var(--apple-blue);
   font-weight: 600;
-}
-
-.unit-sub {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  font-weight: normal;
-  margin-left: 4px;
 }

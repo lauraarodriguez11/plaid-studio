@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Petite Plaid Studio</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -11,6 +12,7 @@
 </head>
 <body>
 
+  <!-- Barra de navegación estilo macOS con enlace oficial -->
   <header class="app-header">
     <div class="header-inner">
       <div class="brand">
@@ -18,21 +20,28 @@
         <h1>Petite Plaid Studio</h1>
       </div>
       <div class="header-meta">
-        <span class="badge">Estructura Oficial Lo & Behold (10 Telas)</span>
+        <a href="https://www.loandbeholdstitchery.com/blogs/lo-and-behold/petite-plaid-quilt-pattern-all-the-details?utm_source=Pinterest&utm_medium=organic" 
+           target="_blank" 
+           rel="noopener noreferrer" 
+           class="badge-link" 
+           title="Ver patrón original en Lo & Behold Stitchery">
+          Estructura Oficial Lo & Behold Stitchery ↗
+        </a>
       </div>
     </div>
   </header>
 
+  <!-- Espacio de trabajo -->
   <main class="app-layout">
     
-    <!-- BARRA LATERAL (INSPECTOR) -->
+    <!-- Barra lateral (Inspector) -->
     <aside class="sidebar">
       
-      <!-- Paleta y Relaciones de Color -->
+      <!-- Color Key (10 Telas) -->
       <section class="card">
         <div class="card-header">
           <h2>Color Key (10 Telas)</h2>
-          <span class="hint-pill">Clic para pintar</span>
+          <span class="hint-pill">Clic para activar</span>
         </div>
         <p class="formula-info">
           A1+A1=A2 | B1+B1=B2 | C1+C1=C2<br>
@@ -41,41 +50,42 @@
         <div id="palette" class="palette-grid"></div>
       </section>
 
-      <!-- Bandas del Bloque en Pulgadas -->
+      <!-- Bandas del bloque en cm -->
       <section class="card">
         <div class="card-header">
           <h2>Bandas del Bloque</h2>
-          <span class="subtext">Medidas en Pulgadas (in)</span>
+          <span class="subtext">Medidas en cm</span>
         </div>
         <div id="stripControls" class="strip-list"></div>
       </section>
 
-      <!-- Ajustes de Costura y Quilt -->
+      <!-- Ajustes de Costura y Repetición de Bloques -->
       <section class="card">
         <div class="card-header">
           <h2>Configuración del Quilt</h2>
         </div>
         
         <div class="form-group">
-          <label for="seamAllowance">Margen de costura (in standard: 0.25")</label>
-          <input type="number" id="seamAllowance" value="0.25" step="0.05" min="0" />
+          <label for="seamAllowance">Margen de costura (cm)</label>
+          <input type="number" id="seamAllowance" value="0.75" step="0.05" min="0" />
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label for="repeatX">Bloques Horiz.</label>
-            <input type="number" id="repeatX" value="2" min="1" max="10" />
+            <label for="repeatX">Bloques Horizontales</label>
+            <input type="number" id="repeatX" value="2" min="1" max="15" />
           </div>
           <div class="form-group">
-            <label for="repeatY">Bloques Vert.</label>
-            <input type="number" id="repeatY" value="2" min="1" max="10" />
+            <label for="repeatY">Bloques Verticales</label>
+            <input type="number" id="repeatY" value="2" min="1" max="15" />
           </div>
         </div>
+        <p class="blocks-summary" id="blocksSummaryText">Total: 4 bloques (2 × 2)</p>
       </section>
 
     </aside>
 
-    <!-- LIENZO Y TABLA DE CORTE EN CM -->
+    <!-- Lienzo central y Ficha de corte métrica -->
     <section class="canvas-stage">
       
       <div class="card canvas-card">
@@ -84,7 +94,7 @@
             <h2>Lienzo del Quilt</h2>
             <p class="canvas-status">Pintar celda con tela activa: <strong id="activeColorLabel"></strong></p>
           </div>
-          <div class="zoom-indicator" id="blockSizeDisplay">Bloque: --</div>
+          <div class="zoom-indicator" id="blockSizeDisplay">Bloque: -- cm</div>
         </div>
         
         <div class="canvas-viewport">
@@ -92,10 +102,10 @@
         </div>
       </div>
 
-      <!-- Plan de corte expresado en cm -->
+      <!-- Tabla de despiece métrica -->
       <div class="card table-card">
         <div class="card-header">
-          <h2>Plan de Corte de Piezas (Medidas en cm)</h2>
+          <h2>Plan de Corte de Piezas (cm)</h2>
         </div>
         <div class="table-responsive">
           <table class="apple-table">
@@ -103,7 +113,7 @@
               <tr>
                 <th>Tela (Rol)</th>
                 <th>Dimensión Acabada (cm)</th>
-                <th>Dimensión de Corte (+ márgenes)</th>
+                <th>Dimensión de Corte (+ márgenes en cm)</th>
                 <th>Por Bloque</th>
                 <th>Total Quilt</th>
               </tr>
