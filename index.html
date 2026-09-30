@@ -24,10 +24,25 @@
     </div>
   </header>
 
+  <!-- Espacio de trabajo descompuesto en 3 zonas independientes -->
   <main class="app-layout">
     
-    <!-- COLUMNA 1: CONTROLES Y AJUSTES -->
-    <aside class="sidebar">
+    <!-- ZONA 1: LIENZO (En vertical queda el primero de todos) -->
+    <section class="card canvas-card" id="canvasSection">
+      <div class="canvas-toolbar">
+        <div>
+          <h2>Lienzo del Quilt</h2>
+          <p class="canvas-status">Pintar celda con tela activa: <strong id="activeColorLabel"></strong></p>
+        </div>
+        <div class="zoom-indicator" id="blockSizeDisplay">Bloque: -- cm</div>
+      </div>
+      <div class="canvas-viewport" id="canvasViewport">
+        <canvas id="quiltCanvas"></canvas>
+      </div>
+    </section>
+
+    <!-- ZONA 2: CONTROLES / AJUSTES (En vertical va justo debajo del lienzo) -->
+    <aside class="sidebar-wrapper" id="sidebarSection">
       
       <!-- Modo de Tonos -->
       <section class="card">
@@ -51,7 +66,7 @@
         <div id="palette" class="palette-grid"></div>
       </section>
 
-      <!-- Bandas semilla en espejo -->
+      <!-- Bandas semilla -->
       <section class="card">
         <div class="card-header">
           <h2>Semilla de Bandas (Mitad de Bloque)</h2>
@@ -89,49 +104,29 @@
 
     </aside>
 
-    <!-- COLUMNA 2: LIENZO (ARRIBA) Y TABLA DE CORTE (ABAJO) -->
-    <section class="canvas-stage">
-      
-      <!-- Lienzo interactivo -->
-      <div class="card canvas-card">
-        <div class="canvas-toolbar">
-          <div>
-            <h2>Lienzo del Quilt</h2>
-            <p class="canvas-status">Pintar celda con tela activa: <strong id="activeColorLabel"></strong></p>
-          </div>
-          <div class="zoom-indicator" id="blockSizeDisplay">Bloque: -- cm</div>
-        </div>
-        
-        <div class="canvas-viewport" id="canvasViewport">
-          <canvas id="quiltCanvas"></canvas>
-        </div>
+    <!-- ZONA 3: TABLA DE CORTE (Al final de todo en vertical) -->
+    <section class="card table-card" id="tableSection">
+      <div class="card-header">
+        <h2>Plan de Corte de Piezas (cm)</h2>
       </div>
-
-      <!-- Plan de corte -->
-      <div class="card table-card">
-        <div class="card-header">
-          <h2>Plan de Corte de Piezas (cm)</h2>
-        </div>
-        <div class="table-responsive">
-          <table class="apple-table">
-            <thead>
-              <tr>
-                <th>Tela</th>
-                <th>Acabado (cm)</th>
-                <th>Corte (+ margen)</th>
-                <th>Por Bloque</th>
-                <th>Total Quilt</th>
-              </tr>
-            </thead>
-            <tbody id="cutListBody"></tbody>
-          </table>
-        </div>
+      <div class="table-responsive">
+        <table class="apple-table">
+          <thead>
+            <tr>
+              <th>Tela</th>
+              <th>Acabado (cm)</th>
+              <th>Corte (+ margen)</th>
+              <th>Por Bloque</th>
+              <th>Total Quilt</th>
+            </tr>
+          </thead>
+          <tbody id="cutListBody"></tbody>
+        </table>
       </div>
-
     </section>
 
   </main>
 
-  <script src="app.js?v=11.0"></script>
+  <script src="app.js?v=12.0"></script>
 </body>
 </html>
