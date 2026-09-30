@@ -217,10 +217,9 @@ function drawCanvas() {
   document.getElementById("blockSizeDisplay").textContent = 
     `Bloque: ${blockDimCm.toFixed(1)} cm | Total: ${totalWCm.toFixed(1)} × ${totalHCm.toFixed(1)} cm`;
 
-  // Calcular dimensiones disponibles en el viewport real
   const rect = viewport.getBoundingClientRect();
   const availableW = Math.max(120, (rect.width || viewport.clientWidth || 300) - 16);
-  const availableH = Math.max(120, (rect.height || viewport.clientHeight || 280) - 16);
+  const availableH = Math.max(120, (rect.height || viewport.clientHeight || 240) - 16);
 
   const pxPerCm = Math.min(availableW / totalWCm, availableH / totalHCm);
 
@@ -257,7 +256,6 @@ function drawCanvas() {
   }
 }
 
-// Detección de celda (válido para ratón y toque táctil)
 function handleCanvasPointer(clientX, clientY) {
   const canvas = document.getElementById("quiltCanvas");
   const rect = canvas.getBoundingClientRect();
@@ -376,34 +374,6 @@ function updateAll() {
   calculateCuts();
 }
 
-// Navegación de pestañas en móvil
-document.querySelectorAll(".tab-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    const targetTab = btn.dataset.tab;
-    const isMobile = window.innerWidth <= 860;
-
-    if (isMobile) {
-      // Ocultar todos los paneles de pestañas
-      document.getElementById("tab-canvas").classList.remove("active");
-      document.getElementById("tab-controls").classList.remove("active");
-      document.getElementById("tab-cuts").classList.remove("active");
-
-      if (targetTab === "tab-canvas") {
-        document.getElementById("tab-canvas").classList.add("active");
-        setTimeout(drawCanvas, 50);
-      } else if (targetTab === "tab-controls") {
-        document.getElementById("tab-controls").classList.add("active");
-      } else if (targetTab === "tab-cuts") {
-        document.getElementById("tab-cuts").classList.add("active");
-      }
-    }
-  });
-});
-
-// Botones de modo
 document.querySelectorAll(".seg-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     generateRandomTartan(parseInt(btn.dataset.mode));
@@ -420,6 +390,5 @@ document.getElementById("repeatY").addEventListener("input", updateAll);
 
 window.addEventListener("resize", drawCanvas);
 
-// Inicializar
 generateRandomTartan(10);
 setTimeout(drawCanvas, 60);

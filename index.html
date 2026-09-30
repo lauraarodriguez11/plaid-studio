@@ -24,17 +24,27 @@
     </div>
   </header>
 
-  <!-- Barra de pestañas para móvil (oculta en escritorio) -->
-  <nav class="mobile-tabs" id="mobileTabs">
-    <button class="tab-btn active" data-tab="tab-canvas">Lienzo</button>
-    <button class="tab-btn" data-tab="tab-controls">Ajustes & Paleta</button>
-    <button class="tab-btn" data-tab="tab-cuts">Plan de Corte</button>
-  </nav>
-
   <main class="app-layout">
     
-    <!-- BARRA LATERAL (AJUSTES) -->
-    <aside class="sidebar tab-content" id="tab-controls">
+    <!-- SECCIÓN DEL LIENZO (En móvil queda fijo arriba) -->
+    <section class="canvas-stage">
+      <div class="card canvas-card">
+        <div class="canvas-toolbar">
+          <div>
+            <h2>Lienzo del Quilt</h2>
+            <p class="canvas-status">Pintar celda con tela activa: <strong id="activeColorLabel"></strong></p>
+          </div>
+          <div class="zoom-indicator" id="blockSizeDisplay">Bloque: -- cm</div>
+        </div>
+        
+        <div class="canvas-viewport" id="canvasViewport">
+          <canvas id="quiltCanvas"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN DE CONTROLES Y PLAN DE CORTE (Scrolleable debajo del lienzo) -->
+    <section class="controls-stage">
       
       <!-- Modo de Tonos -->
       <section class="card">
@@ -58,11 +68,11 @@
         <div id="palette" class="palette-grid"></div>
       </section>
 
-      <!-- Bandas semilla en espejo -->
+      <!-- Bandas semilla -->
       <section class="card">
         <div class="card-header">
           <h2>Semilla de Bandas (Mitad de Bloque)</h2>
-          <span class="subtext">cm</span>
+          <span class="subtext">Medidas en cm</span>
         </div>
         <p class="hint-pill" style="display:block; margin-bottom:8px;">
           Se refleja en espejo para generar el bloque simétrico.
@@ -94,28 +104,8 @@
         <p class="blocks-summary" id="blocksSummaryText">Total: 4 bloques (2 × 2)</p>
       </section>
 
-    </aside>
-
-    <!-- ÁREA CENTRAL (LIENZO Y TABLA) -->
-    <section class="canvas-stage tab-content active" id="tab-canvas">
-      
-      <!-- Lienzo -->
-      <div class="card canvas-card">
-        <div class="canvas-toolbar">
-          <div>
-            <h2>Lienzo del Quilt</h2>
-            <p class="canvas-status">Pintar con tela activa: <strong id="activeColorLabel"></strong></p>
-          </div>
-          <div class="zoom-indicator" id="blockSizeDisplay">Bloque: -- cm</div>
-        </div>
-        
-        <div class="canvas-viewport" id="canvasViewport">
-          <canvas id="quiltCanvas"></canvas>
-        </div>
-      </div>
-
-      <!-- Plan de corte -->
-      <div class="card table-card tab-content" id="tab-cuts">
+      <!-- Plan de Corte -->
+      <section class="card table-card">
         <div class="card-header">
           <h2>Plan de Corte de Piezas (cm)</h2>
         </div>
@@ -133,12 +123,12 @@
             <tbody id="cutListBody"></tbody>
           </table>
         </div>
-      </div>
+      </section>
 
     </section>
 
   </main>
 
-  <script src="app.js?v=9.0"></script>
+  <script src="app.js?v=10.0"></script>
 </body>
 </html>
