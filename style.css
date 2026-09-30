@@ -33,7 +33,7 @@ body {
   -webkit-backdrop-filter: blur(20px);
   background: rgba(245, 245, 247, 0.85);
   border-bottom: 1px solid var(--border-light);
-  padding: 12px 32px;
+  padding: 14px 32px;
 }
 
 .header-inner {
@@ -44,22 +44,10 @@ body {
   align-items: center;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.apple-dot {
-  width: 10px;
-  height: 10px;
-  background-color: var(--apple-blue);
-  border-radius: 50%;
-}
-
 .brand h1 {
   font-size: 1.15rem;
   font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .header-actions {
@@ -84,22 +72,6 @@ body {
 .btn-random:hover {
   background: #f0f0f2;
   border-color: rgba(0, 0, 0, 0.15);
-}
-
-.badge-link {
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: var(--apple-blue);
-  background: rgba(0, 113, 227, 0.08);
-  padding: 6px 12px;
-  border-radius: 20px;
-  text-decoration: none;
-  transition: all 0.15s ease;
-}
-
-.badge-link:hover {
-  background: rgba(0, 113, 227, 0.16);
-  color: var(--apple-blue-hover);
 }
 
 .app-layout {
@@ -135,7 +107,6 @@ body {
   font-weight: 600;
 }
 
-/* Control segmentado Apple */
 .segmented-control {
   display: flex;
   background: rgba(0, 0, 0, 0.06);
@@ -184,7 +155,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 260px;
+  max-height: 270px;
   overflow-y: auto;
 }
 

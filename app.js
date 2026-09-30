@@ -1,44 +1,22 @@
-// --- CONFIGURACIÓN DE MODOS DE TARTÁN ---
+// --- CONFIGURACIÓN DE MODOS CON NOMENCLATURA COMBINATORIA SIMÉTRICA ---
 const MODES = {
   3: {
-    name: "Gingham / Elemental (3 Tonos)",
-    desc: "2 colores base (A, B) → 2 tonos puros + 1 cruce (AB).",
+    desc: "2 bases (A, B) → 2 puros (A, B) + 1 cruce (AB).",
     bases: ["A", "B"],
     roles: ["A", "B", "AB"],
-    resolve: (r, c) => (r === c ? r : "AB"),
-    seedCount: 2
+    resolve: (r, c) => (r === c ? r : "AB")
   },
   6: {
-    name: "Tartán de Clan / Black Watch (6 Tonos)",
-    desc: "3 colores base (A, B, C) → 3 tonos puros + 3 cruces (AB, AC, BC).",
+    desc: "3 bases (A, B, C) → 3 puros (A, B, C) + 3 cruces (AB, AC, BC).",
     bases: ["A", "B", "C"],
     roles: ["A", "B", "C", "AB", "AC", "BC"],
-    resolve: (r, c) => {
-      if (r === c) return r;
-      const pair = [r, c].sort().join("");
-      return pair;
-    },
-    seedCount: 3
+    resolve: (r, c) => (r === c ? r : [r, c].sort().join(""))
   },
   10: {
-    name: "Royal Stewart / Petite Plaid (10 Tonos)",
-    desc: "4 colores base (BG, A1, B1, C1) → 4 tonos puros/solapados + 6 cruces intermedios.",
-    bases: ["BG", "A1", "B1", "C1"],
-    roles: ["BG", "A1", "A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3"],
-    resolve: (row, col) => {
-      if (row === "BG" && col === "BG") return "BG";
-      if (row === "BG") return col;
-      if (col === "BG") return row;
-      if (row === "A1" && col === "A1") return "A2";
-      if (row === "B1" && col === "B1") return "B2";
-      if (row === "C1" && col === "C1") return "C2";
-      const pair = [row, col].sort().join("+");
-      if (pair === "A1+B1") return "A3";
-      if (pair === "B1+C1") return "B3";
-      if (pair === "A1+C1") return "C3";
-      return "BG";
-    },
-    seedCount: 4
+    desc: "4 bases (A, B, C, D) → 4 puros (A, B, C, D) + 6 cruces (AB, AC, AD, BC, BD, CD).",
+    bases: ["A", "B", "C", "D"],
+    roles: ["A", "B", "C", "D", "AB", "AC", "AD", "BC", "BD", "CD"],
+    resolve: (r, c) => (r === c ? r : [r, c].sort().join(""))
   }
 };
 
@@ -46,10 +24,10 @@ let currentMode = 10;
 let fabrics = [];
 let activeFabricId = "";
 let seedStrips = []; // Media secuencia
-let fullStrips = []; // Secuencia expandida en espejo
+let fullStrips = []; // Secuencia completa expandida en espejo
 let blockMatrix = [];
 
-// Conversión HSL a HEX para generar colores coordinados
+// Conversión HSL a HEX para generar armonías textiles creíbles
 function hslToHex(h, s, l) {
   l /= 100;
   const a = (s * Math.min(l, 1 - l)) / 100;
@@ -61,7 +39,7 @@ function hslToHex(h, s, l) {
   return `#${f(0)}${f(8)}${f(4)}`;
 }
 
-// Mezcla RGB para calcular tonos de intersección creíbles
+// Mezcla RGB para calcular tonos de intersección de urdimbre y trama
 function blendHex(hex1, hex2, weight = 0.5) {
   const c1 = parseInt(hex1.slice(1), 16);
   const c2 = parseInt(hex2.slice(1), 16);
@@ -79,19 +57,17 @@ function generateRandomTartan(modeKey = currentMode) {
   const config = MODES[currentMode];
   document.getElementById("modeDescription").textContent = config.desc;
 
-  // Actualizar botones segmentados
   document.querySelectorAll(".seg-btn").forEach(btn => {
     btn.classList.toggle("active", parseInt(btn.dataset.mode) === currentMode);
   });
 
-  // 1. Generar paleta aleatoria armónica
   const baseHue = Math.floor(Math.random() * 360);
-  const baseSaturation = 45 + Math.floor(Math.random() * 30); // 45% - 75%
+  const baseSaturation = 45 + Math.floor(Math.random() * 30);
   const baseColors = {};
 
   if (currentMode === 3) {
     baseColors["A"] = hslToHex(baseHue, baseSaturation, 30);
-    baseColors["B"] = hslToHex((baseHue + 180) % 360, 20, 88); // Fondo claro
+    baseColors["B"] = hslToHex((baseHue + 180) % 360, 20, 88);
     fabrics = [
       { id: "A", name: "A", hex: baseColors["A"] },
       { id: "B", name: "B", hex: baseColors["B"] },
@@ -99,8 +75,8 @@ function generateRandomTartan(modeKey = currentMode) {
     ];
   } else if (currentMode === 6) {
     baseColors["A"] = hslToHex(baseHue, baseSaturation, 30);
-    baseColors["B"] = hslToHex((baseHue + 60) % 360, baseSaturation, 40);
-    baseColors["C"] = hslToHex((baseHue + 120) % 360, baseSaturation + 10, 20);
+    baseColors["B"] = hslToHex((baseHue + 60) % 360, baseSaturation, 42);
+    baseColors["C"] = hslToHex((baseHue + 130) % 360, baseSaturation + 10, 22);
     fabrics = [
       { id: "A", name: "A", hex: baseColors["A"] },
       { id: "B", name: "B", hex: baseColors["B"] },
@@ -110,29 +86,29 @@ function generateRandomTartan(modeKey = currentMode) {
       { id: "BC", name: "BC", hex: blendHex(baseColors["B"], baseColors["C"], 0.5) }
     ];
   } else {
-    // 10 Tonos
-    baseColors["BG"] = hslToHex(baseHue, 35, 75); // Fondo
-    baseColors["A1"] = hslToHex((baseHue + 45) % 360, 65, 50);
-    baseColors["B1"] = hslToHex((baseHue + 150) % 360, 60, 42);
-    baseColors["C1"] = hslToHex((baseHue + 260) % 360, 50, 25);
+    // 10 Tonos: A, B, C, D y sus 6 cruces intermedios
+    baseColors["A"] = hslToHex(baseHue, 35, 78);             // Fondo claro
+    baseColors["B"] = hslToHex((baseHue + 45) % 360, 65, 50);  // Tono primario
+    baseColors["C"] = hslToHex((baseHue + 140) % 360, 60, 40); // Tono secundario
+    baseColors["D"] = hslToHex((baseHue + 250) % 360, 50, 24); // Tono acento oscuro
 
     fabrics = [
-      { id: "BG", name: "BG", hex: baseColors["BG"] },
-      { id: "A1", name: "A1", hex: baseColors["A1"] },
-      { id: "A2", name: "A2", hex: blendHex(baseColors["A1"], "#000000", 0.3) },
-      { id: "A3", name: "A3", hex: blendHex(baseColors["A1"], baseColors["B1"], 0.5) },
-      { id: "B1", name: "B1", hex: baseColors["B1"] },
-      { id: "B2", name: "B2", hex: blendHex(baseColors["B1"], "#000000", 0.3) },
-      { id: "B3", name: "B3", hex: blendHex(baseColors["B1"], baseColors["C1"], 0.5) },
-      { id: "C1", name: "C1", hex: baseColors["C1"] },
-      { id: "C2", name: "C2", hex: blendHex(baseColors["C1"], "#000000", 0.4) },
-      { id: "C3", name: "C3", hex: blendHex(baseColors["A1"], baseColors["C1"], 0.5) }
+      { id: "A", name: "A", hex: baseColors["A"] },
+      { id: "B", name: "B", hex: baseColors["B"] },
+      { id: "C", name: "C", hex: baseColors["C"] },
+      { id: "D", name: "D", hex: baseColors["D"] },
+      { id: "AB", name: "AB", hex: blendHex(baseColors["A"], baseColors["B"], 0.5) },
+      { id: "AC", name: "AC", hex: blendHex(baseColors["A"], baseColors["C"], 0.5) },
+      { id: "AD", name: "AD", hex: blendHex(baseColors["A"], baseColors["D"], 0.5) },
+      { id: "BC", name: "BC", hex: blendHex(baseColors["B"], baseColors["C"], 0.5) },
+      { id: "BD", name: "BD", hex: blendHex(baseColors["B"], baseColors["D"], 0.5) },
+      { id: "CD", name: "CD", hex: blendHex(baseColors["C"], baseColors["D"], 0.5) }
     ];
   }
 
   activeFabricId = fabrics[0].id;
 
-  // 2. Generar medidas de bandas semilla (en cm) con proporciones de tartán real
+  // Generar bandas semilla en cm
   seedStrips = [];
   const sampleWidths = [2.0, 2.5, 3.5, 5.0, 6.5, 8.0];
   for (let i = 0; i < config.bases.length; i++) {
@@ -144,7 +120,7 @@ function generateRandomTartan(modeKey = currentMode) {
     });
   }
 
-  // Si hay pocas bases, añadimos una franja de acento para enriquecer el bloque
+  // Si son 2 o 3 bases, añadimos franja de contraste
   if (seedStrips.length < 4) {
     const extraBase = config.bases[0];
     seedStrips.push({
@@ -157,7 +133,7 @@ function generateRandomTartan(modeKey = currentMode) {
   rebuildMirroredSett();
 }
 
-// 3. Expansión simétrica en espejo (Sett Simétrico Tradicional)
+// Expansión simétrica en espejo (Sett Simétrico Tradicional)
 function rebuildMirroredSett() {
   const config = MODES[currentMode];
   // Si la semilla es [S0, S1, S2, S3], el espejo genera: [S0, S1, S2, S3, S2, S1]
@@ -166,7 +142,6 @@ function rebuildMirroredSett() {
     fullStrips.push({ ...seedStrips[i] });
   }
 
-  // Construir matriz simétrica
   const n = fullStrips.length;
   blockMatrix = [];
   for (let r = 0; r < n; r++) {
@@ -212,7 +187,7 @@ function changeColorHex(id, hex) {
   updateAll();
 }
 
-// UI: Controles de bandas semilla (editables en cm)
+// UI: Controles de bandas semilla (cm)
 function renderStripControls() {
   const container = document.getElementById("stripControls");
   container.innerHTML = seedStrips.map((s, idx) => `
@@ -232,7 +207,7 @@ function updateSeedWidth(idx, val) {
   rebuildMirroredSett();
 }
 
-// Dibujo Canvas
+// Dibujar Canvas
 function drawCanvas() {
   const canvas = document.getElementById("quiltCanvas");
   const ctx = canvas.getContext("2d");
@@ -323,7 +298,7 @@ document.getElementById("quiltCanvas").addEventListener("click", function (evt) 
   updateAll();
 });
 
-// Despiece métrico ordenado según los roles
+// Despiece métrico ordenado según roles combinatorios
 function calculateCuts() {
   const seamCm = parseFloat(document.getElementById("seamAllowance").value) || 0.75;
   const repX = parseInt(document.getElementById("repeatX").value) || 2;
@@ -396,22 +371,22 @@ function updateAll() {
   calculateCuts();
 }
 
-// Botones segmentados de selección de modo
+// Botones de modo
 document.querySelectorAll(".seg-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     generateRandomTartan(parseInt(btn.dataset.mode));
   });
 });
 
-// Botón de aleatoriedad
+// Botón aleatorio
 document.getElementById("btnRandomize").addEventListener("click", () => {
   generateRandomTartan(currentMode);
 });
 
-// Listeners de parámetros
+// Parámetros
 document.getElementById("seamAllowance").addEventListener("input", updateAll);
 document.getElementById("repeatX").addEventListener("input", updateAll);
 document.getElementById("repeatY").addEventListener("input", updateAll);
 
-// Inicializar de forma aleatoria al cargar la página
+// Inicializar por defecto con 10 tonos simétricos
 generateRandomTartan(10);

@@ -12,6 +12,7 @@
 </head>
 <body>
 
+  <!-- Cabecera limpia sin círculo ni enlaces externos -->
   <header class="app-header">
     <div class="header-inner">
       <div class="brand">
@@ -19,13 +20,6 @@
       </div>
       <div class="header-actions">
         <button id="btnRandomize" class="btn-random">🎲 Generar Tartán Aleatorio</button>
-        <a href="https://www.loandbeholdstitchery.com/blogs/lo-and-behold/petite-plaid-quilt-pattern-all-the-details?utm_source=Pinterest&utm_medium=organic" 
-           target="_blank" 
-           rel="noopener noreferrer" 
-           class="badge-link" 
-           title="Ver patrón original en Lo & Behold Stitchery">
-          Estructura Oficial Lo & Behold Stitchery ↗
-        </a>
       </div>
     </div>
   </header>
@@ -40,9 +34,9 @@
           <h2>Modo de Tartán</h2>
         </div>
         <div class="segmented-control">
-          <button class="seg-btn" data-mode="3">3 Tonos (Gingham)</button>
-          <button class="seg-btn" data-mode="6">6 Tonos (Clan)</button>
-          <button class="seg-btn active" data-mode="10">10 Tonos (Stewart)</button>
+          <button class="seg-btn" data-mode="3">3 Tonos</button>
+          <button class="seg-btn" data-mode="6">6 Tonos</button>
+          <button class="seg-btn active" data-mode="10">10 Tonos</button>
         </div>
         <p class="formula-info" id="modeDescription"></p>
       </section>
@@ -63,7 +57,7 @@
           <span class="subtext">Medidas en cm</span>
         </div>
         <p class="hint-pill" style="display:block; margin-bottom:8px;">
-          Se refleja automáticamente en espejo para formar el sett simétrico real.
+          Se refleja automáticamente en espejo para formar el bloque simétrico.
         </p>
         <div id="stripControls" class="strip-list"></div>
       </section>
@@ -135,6 +129,6 @@
 
   </main>
 
-  <script src="app.js?v=5.0"></script>
+  <script src="app.js?v=6.0"></script>
 </body>
 </html>
