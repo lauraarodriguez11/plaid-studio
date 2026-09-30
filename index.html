@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wenyers's Plaid Studio</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,25 +26,8 @@
 
   <main class="app-layout">
     
-    <!-- SECCIÓN DEL LIENZO (En móvil queda fijo arriba) -->
-    <section class="canvas-stage">
-      <div class="card canvas-card">
-        <div class="canvas-toolbar">
-          <div>
-            <h2>Lienzo del Quilt</h2>
-            <p class="canvas-status">Pintar celda con tela activa: <strong id="activeColorLabel"></strong></p>
-          </div>
-          <div class="zoom-indicator" id="blockSizeDisplay">Bloque: -- cm</div>
-        </div>
-        
-        <div class="canvas-viewport" id="canvasViewport">
-          <canvas id="quiltCanvas"></canvas>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECCIÓN DE CONTROLES Y PLAN DE CORTE (Scrolleable debajo del lienzo) -->
-    <section class="controls-stage">
+    <!-- COLUMNA 1: CONTROLES Y AJUSTES -->
+    <aside class="sidebar">
       
       <!-- Modo de Tonos -->
       <section class="card">
@@ -68,7 +51,7 @@
         <div id="palette" class="palette-grid"></div>
       </section>
 
-      <!-- Bandas semilla -->
+      <!-- Bandas semilla en espejo -->
       <section class="card">
         <div class="card-header">
           <h2>Semilla de Bandas (Mitad de Bloque)</h2>
@@ -104,8 +87,28 @@
         <p class="blocks-summary" id="blocksSummaryText">Total: 4 bloques (2 × 2)</p>
       </section>
 
-      <!-- Plan de Corte -->
-      <section class="card table-card">
+    </aside>
+
+    <!-- COLUMNA 2: LIENZO (ARRIBA) Y TABLA DE CORTE (ABAJO) -->
+    <section class="canvas-stage">
+      
+      <!-- Lienzo interactivo -->
+      <div class="card canvas-card">
+        <div class="canvas-toolbar">
+          <div>
+            <h2>Lienzo del Quilt</h2>
+            <p class="canvas-status">Pintar celda con tela activa: <strong id="activeColorLabel"></strong></p>
+          </div>
+          <div class="zoom-indicator" id="blockSizeDisplay">Bloque: -- cm</div>
+        </div>
+        
+        <div class="canvas-viewport" id="canvasViewport">
+          <canvas id="quiltCanvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Plan de corte -->
+      <div class="card table-card">
         <div class="card-header">
           <h2>Plan de Corte de Piezas (cm)</h2>
         </div>
@@ -123,12 +126,12 @@
             <tbody id="cutListBody"></tbody>
           </table>
         </div>
-      </section>
+      </div>
 
     </section>
 
   </main>
 
-  <script src="app.js?v=10.0"></script>
+  <script src="app.js?v=11.0"></script>
 </body>
 </html>

@@ -217,14 +217,14 @@ function drawCanvas() {
   document.getElementById("blockSizeDisplay").textContent = 
     `Bloque: ${blockDimCm.toFixed(1)} cm | Total: ${totalWCm.toFixed(1)} × ${totalHCm.toFixed(1)} cm`;
 
-  const rect = viewport.getBoundingClientRect();
-  const availableW = Math.max(120, (rect.width || viewport.clientWidth || 300) - 16);
-  const availableH = Math.max(120, (rect.height || viewport.clientHeight || 240) - 16);
+  // Ancho real del contenedor disponible
+  const containerWidth = viewport.clientWidth > 0 ? viewport.clientWidth - 32 : 460;
+  const maxViewSize = Math.min(containerWidth, 540);
 
-  const pxPerCm = Math.min(availableW / totalWCm, availableH / totalHCm);
+  const pxPerCm = Math.min(maxViewSize / totalWCm, 440 / totalHCm);
 
-  canvas.width = Math.max(80, Math.floor(totalWCm * pxPerCm));
-  canvas.height = Math.max(80, Math.floor(totalHCm * pxPerCm));
+  canvas.width = Math.max(100, Math.floor(totalWCm * pxPerCm));
+  canvas.height = Math.max(100, Math.floor(totalHCm * pxPerCm));
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -256,6 +256,7 @@ function drawCanvas() {
   }
 }
 
+// Clic interactivo en celda
 function handleCanvasPointer(clientX, clientY) {
   const canvas = document.getElementById("quiltCanvas");
   const rect = canvas.getBoundingClientRect();
@@ -297,10 +298,9 @@ const canvasEl = document.getElementById("quiltCanvas");
 canvasEl.addEventListener("click", evt => handleCanvasPointer(evt.clientX, evt.clientY));
 canvasEl.addEventListener("touchend", evt => {
   if (evt.changedTouches && evt.changedTouches[0]) {
-    evt.preventDefault();
     handleCanvasPointer(evt.changedTouches[0].clientX, evt.changedTouches[0].clientY);
   }
-}, { passive: false });
+});
 
 function calculateCuts() {
   const seamCm = parseFloat(document.getElementById("seamAllowance").value) || 0.75;
@@ -390,5 +390,6 @@ document.getElementById("repeatY").addEventListener("input", updateAll);
 
 window.addEventListener("resize", drawCanvas);
 
+// Inicializar
 generateRandomTartan(10);
-setTimeout(drawCanvas, 60);
+setTimeout(drawCanvas, 50);
