@@ -23,11 +23,10 @@ const MODES = {
 let currentMode = 10;
 let fabrics = [];
 let activeFabricId = "";
-let seedStrips = []; // Media secuencia
-let fullStrips = []; // Secuencia completa expandida en espejo
+let seedStrips = [];
+let fullStrips = [];
 let blockMatrix = [];
 
-// Conversión HSL a HEX para generar armonías textiles creíbles
 function hslToHex(h, s, l) {
   l /= 100;
   const a = (s * Math.min(l, 1 - l)) / 100;
@@ -39,7 +38,6 @@ function hslToHex(h, s, l) {
   return `#${f(0)}${f(8)}${f(4)}`;
 }
 
-// Mezcla RGB para calcular tonos de intersección de urdimbre y trama
 function blendHex(hex1, hex2, weight = 0.5) {
   const c1 = parseInt(hex1.slice(1), 16);
   const c2 = parseInt(hex2.slice(1), 16);
@@ -51,7 +49,6 @@ function blendHex(hex1, hex2, weight = 0.5) {
   return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
 }
 
-// Generador aleatorio de paletas y proporciones de banda
 function generateRandomTartan(modeKey = currentMode) {
   currentMode = modeKey;
   const config = MODES[currentMode];
@@ -107,14 +104,13 @@ function generateRandomTartan(modeKey = currentMode) {
 
   activeFabricId = fabrics[0].id;
 
-  // Generar bandas semilla en cm
   seedStrips = [];
   const sampleWidths = [2.0, 2.5, 3.5, 5.0, 6.5, 8.0];
   for (let i = 0; i < config.bases.length; i++) {
     const w = sampleWidths[Math.floor(Math.random() * sampleWidths.length)];
     seedStrips.push({
       id: config.bases[i],
-      label: `Banda Base (${config.bases[i]})`,
+      label: `Banda (${config.bases[i]})`,
       width: w
     });
   }
@@ -131,7 +127,6 @@ function generateRandomTartan(modeKey = currentMode) {
   rebuildMirroredSett();
 }
 
-// Expansión simétrica en espejo (Sett Simétrico Tradicional)
 function rebuildMirroredSett() {
   const config = MODES[currentMode];
   fullStrips = [...seedStrips];
@@ -154,7 +149,6 @@ function rebuildMirroredSett() {
   updateAll();
 }
 
-// UI: Paleta de telas
 function renderPalette() {
   const container = document.getElementById("palette");
   container.innerHTML = fabrics.map(f => `
@@ -184,7 +178,6 @@ function changeColorHex(id, hex) {
   updateAll();
 }
 
-// UI: Controles de bandas semilla (cm)
 function renderStripControls() {
   const container = document.getElementById("stripControls");
   container.innerHTML = seedStrips.map((s, idx) => `
@@ -193,7 +186,7 @@ function renderStripControls() {
       <div class="strip-inputs">
         <input type="number" step="0.5" min="0.5" value="${s.width}" 
                onchange="updateSeedWidth(${idx}, parseFloat(this.value))" />
-        <span style="color: var(--text-secondary); font-size: 0.75rem;">cm</span>
+        <span style="color: var(--text-secondary); font-size: 0.72rem;">cm</span>
       </div>
     </div>
   `).join("");
@@ -204,7 +197,6 @@ function updateSeedWidth(idx, val) {
   rebuildMirroredSett();
 }
 
-// Dibujar Canvas con cálculo garantizado de dimensiones
 function drawCanvas() {
   const canvas = document.getElementById("quiltCanvas");
   if (!canvas) return;
@@ -223,19 +215,17 @@ function drawCanvas() {
   const totalHCm = blockDimCm * repY;
 
   document.getElementById("blockSizeDisplay").textContent = 
-    `Bloque: ${blockDimCm.toFixed(1)} × ${blockDimCm.toFixed(1)} cm | Quilt: ${totalWCm.toFixed(1)} × ${totalHCm.toFixed(1)} cm`;
+    `Bloque: ${blockDimCm.toFixed(1)} cm | Total: ${totalWCm.toFixed(1)} × ${totalHCm.toFixed(1)} cm`;
 
-  // Asegurar dimensiones mínimas reales aunque el viewport aún esté calculando su layout
-  const viewW = viewport && viewport.clientWidth > 0 ? viewport.clientWidth : 500;
-  const viewH = viewport && viewport.clientHeight > 0 ? viewport.clientHeight : 380;
-  
-  const availableW = Math.max(160, viewW - 24);
-  const availableH = Math.max(160, viewH - 24);
+  // Calcular dimensiones disponibles en el viewport real
+  const rect = viewport.getBoundingClientRect();
+  const availableW = Math.max(120, (rect.width || viewport.clientWidth || 300) - 16);
+  const availableH = Math.max(120, (rect.height || viewport.clientHeight || 280) - 16);
 
   const pxPerCm = Math.min(availableW / totalWCm, availableH / totalHCm);
 
-  canvas.width = Math.max(100, Math.floor(totalWCm * pxPerCm));
-  canvas.height = Math.max(100, Math.floor(totalHCm * pxPerCm));
+  canvas.width = Math.max(80, Math.floor(totalWCm * pxPerCm));
+  canvas.height = Math.max(80, Math.floor(totalHCm * pxPerCm));
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -267,17 +257,18 @@ function drawCanvas() {
   }
 }
 
-// Clic interactivo en celda
-document.getElementById("quiltCanvas").addEventListener("click", function (evt) {
-  const rect = this.getBoundingClientRect();
-  const clickX = evt.clientX - rect.left;
-  const clickY = evt.clientY - rect.top;
+// Detección de celda (válido para ratón y toque táctil)
+function handleCanvasPointer(clientX, clientY) {
+  const canvas = document.getElementById("quiltCanvas");
+  const rect = canvas.getBoundingClientRect();
+  const clickX = clientX - rect.left;
+  const clickY = clientY - rect.top;
 
   const repX = parseInt(document.getElementById("repeatX").value) || 2;
   const repY = parseInt(document.getElementById("repeatY").value) || 2;
   const blockDimCm = fullStrips.reduce((acc, s) => acc + s.width, 0);
 
-  const pxPerCm = this.width / (blockDimCm * repX);
+  const pxPerCm = canvas.width / (blockDimCm * repX);
 
   const xInCm = (clickX / pxPerCm) % blockDimCm;
   const yInCm = (clickY / pxPerCm) % blockDimCm;
@@ -302,9 +293,17 @@ document.getElementById("quiltCanvas").addEventListener("click", function (evt) 
 
   blockMatrix[targetRow][targetCol] = activeFabricId;
   updateAll();
-});
+}
 
-// Despiece métrico ordenado según roles combinatorios
+const canvasEl = document.getElementById("quiltCanvas");
+canvasEl.addEventListener("click", evt => handleCanvasPointer(evt.clientX, evt.clientY));
+canvasEl.addEventListener("touchend", evt => {
+  if (evt.changedTouches && evt.changedTouches[0]) {
+    evt.preventDefault();
+    handleCanvasPointer(evt.changedTouches[0].clientX, evt.changedTouches[0].clientY);
+  }
+}, { passive: false });
+
 function calculateCuts() {
   const seamCm = parseFloat(document.getElementById("seamAllowance").value) || 0.75;
   const repX = parseInt(document.getElementById("repeatX").value) || 2;
@@ -328,8 +327,8 @@ function calculateCuts() {
       if (!pieces[key]) {
         pieces[key] = {
           fabricId,
-          finishedCm: `${sortedFinCm[0].toFixed(1)} × ${sortedFinCm[1].toFixed(1)} cm`,
-          cutCm: `${cutDimsCm[0].toFixed(1)} × ${cutDimsCm[1].toFixed(1)} cm`,
+          finishedCm: `${sortedFinCm[0].toFixed(1)} × ${sortedFinCm[1].toFixed(1)}`,
+          cutCm: `${cutDimsCm[0].toFixed(1)} × ${cutDimsCm[1].toFixed(1)}`,
           dimW: sortedFinCm[0],
           dimH: sortedFinCm[1],
           qty: 0
@@ -358,15 +357,15 @@ function calculateCuts() {
     return `
       <tr>
         <td>
-          <div style="display:flex; align-items:center; gap:8px;">
+          <div style="display:flex; align-items:center; gap:6px;">
             <span class="color-dot" style="background:${f.hex}"></span>
             <strong>${f.name}</strong>
           </div>
         </td>
-        <td><strong>${item.finishedCm}</strong></td>
+        <td>${item.finishedCm}</td>
         <td><strong class="cut-highlight">${item.cutCm}</strong></td>
-        <td>${item.qty} ud.</td>
-        <td><strong>${item.qty * totalBlocks} ud.</strong></td>
+        <td>${item.qty}</td>
+        <td><strong>${item.qty * totalBlocks}</strong></td>
       </tr>
     `;
   }).join("");
@@ -377,6 +376,33 @@ function updateAll() {
   calculateCuts();
 }
 
+// Navegación de pestañas en móvil
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const targetTab = btn.dataset.tab;
+    const isMobile = window.innerWidth <= 860;
+
+    if (isMobile) {
+      // Ocultar todos los paneles de pestañas
+      document.getElementById("tab-canvas").classList.remove("active");
+      document.getElementById("tab-controls").classList.remove("active");
+      document.getElementById("tab-cuts").classList.remove("active");
+
+      if (targetTab === "tab-canvas") {
+        document.getElementById("tab-canvas").classList.add("active");
+        setTimeout(drawCanvas, 50);
+      } else if (targetTab === "tab-controls") {
+        document.getElementById("tab-controls").classList.add("active");
+      } else if (targetTab === "tab-cuts") {
+        document.getElementById("tab-cuts").classList.add("active");
+      }
+    }
+  });
+});
+
 // Botones de modo
 document.querySelectorAll(".seg-btn").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -384,19 +410,16 @@ document.querySelectorAll(".seg-btn").forEach(btn => {
   });
 });
 
-// Botón aleatorio sin icono
 document.getElementById("btnRandomize").addEventListener("click", () => {
   generateRandomTartan(currentMode);
 });
 
-// Parámetros
 document.getElementById("seamAllowance").addEventListener("input", updateAll);
 document.getElementById("repeatX").addEventListener("input", updateAll);
 document.getElementById("repeatY").addEventListener("input", updateAll);
 
-// Escuchar cambios de tamaño
 window.addEventListener("resize", drawCanvas);
 
 // Inicializar
 generateRandomTartan(10);
-setTimeout(drawCanvas, 50); // Redibujar una vez el layout esté renderizado
+setTimeout(drawCanvas, 60);
