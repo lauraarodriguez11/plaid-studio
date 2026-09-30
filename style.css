@@ -8,6 +8,7 @@
   --radius-sm: 8px;
   --radius-md: 14px;
   --shadow-subtle: 0 4px 16px rgba(0, 0, 0, 0.03);
+  --ui-gap: 16px; /* Distancia constante y unificada */
 }
 
 * {
@@ -18,12 +19,11 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* 1. Bloqueo estricto del scroll horizontal y desbloqueo total del vertical */
 html, body {
   width: 100%;
   max-width: 100vw;
-  overflow-x: hidden !important; /* Nunca deslizar hacia los lados */
-  overflow-y: auto !important;   /* Deslizar libremente hacia arriba y abajo */
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
   background-color: var(--bg-system);
   color: var(--text-main);
   min-height: 100%;
@@ -38,7 +38,7 @@ html, body {
   -webkit-backdrop-filter: blur(20px);
   background: rgba(245, 245, 247, 0.9);
   border-bottom: 1px solid var(--border-light);
-  padding: 12px 20px;
+  padding: 12px var(--ui-gap);
   width: 100%;
 }
 
@@ -72,7 +72,7 @@ html, body {
   background: #f0f0f2;
 }
 
-/* Tarjetas */
+/* Tarjetas: sin márgenes externos individuales */
 .card {
   background: var(--surface);
   border: 1px solid var(--border-light);
@@ -80,6 +80,7 @@ html, body {
   padding: 16px;
   box-shadow: var(--shadow-subtle);
   width: 100%;
+  margin: 0 !important;
 }
 
 .card-header {
@@ -142,6 +143,8 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
 }
 
 .palette-item {
@@ -197,6 +200,8 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .strip-item {
@@ -295,11 +300,12 @@ input[type="number"]:focus {
   background: #ffffff;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
-  padding: 12px;
+  padding: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
+  min-height: 380px;
+  overflow: auto;
 }
 
 canvas {
@@ -308,15 +314,13 @@ canvas {
   cursor: crosshair;
   max-width: 100%;
   height: auto;
-  /* touch-action: pan-y permite deslizar verticalmente la página aunque el dedo esté sobre el canvas */
   touch-action: pan-y !important;
 }
 
-/* Tabla de corte */
+/* Tabla */
 .table-responsive {
-  width: 100%;
-  overflow-x: auto; /* Solo la tabla puede scrollear horizontal si la pantalla es ultra estrecha */
-  -webkit-overflow-scrolling: touch;
+  max-height: 380px;
+  overflow-y: auto;
 }
 
 .apple-table {
@@ -324,10 +328,12 @@ canvas {
   border-collapse: separate;
   border-spacing: 0;
   font-size: 0.8rem;
-  min-width: 320px;
 }
 
 .apple-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   text-align: left;
   padding: 8px 10px;
   font-weight: 600;
@@ -348,57 +354,49 @@ canvas {
 
 /* ========================================================
    DISPOSICIÓN HORIZONTAL / ESCRITORIO (>= 861px)
+   Todas las distancias fijadas a var(--ui-gap) = 16px
    ======================================================== */
 @media (min-width: 861px) {
   .app-layout {
     max-width: 1440px;
     margin: 0 auto;
-    padding: 20px 24px;
+    padding: var(--ui-gap); /* Mismo padding arriba, abajo y lados */
     display: grid;
     grid-template-columns: 360px 1fr;
-    grid-template-areas:
-      "sidebar canvas"
-      "sidebar table";
-    gap: 20px;
+    gap: var(--ui-gap); /* Exactamente 16px entre columnas */
     align-items: start;
   }
 
-  #sidebarSection {
-    grid-area: sidebar;
+  .sidebar-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: var(--ui-gap); /* Exactamente 16px entre tarjetas de la izquierda */
   }
 
-  #canvasSection {
-    grid-area: canvas;
-  }
-
-  #tableSection {
-    grid-area: table;
-  }
-
-  .canvas-viewport {
-    min-height: 400px;
+  .main-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-gap); /* Exactamente 16px entre el tartán y la tabla */
   }
 }
 
 /* ========================================================
    DISPOSICIÓN VERTICAL / MÓVIL (< 861px)
-   1º Lienzo arriba
-   2º Controles y paleta accesibles deslizando hacia abajo
-   3º Plan de corte al final
+   Lienzo arriba, luego controles, luego tabla
    ======================================================== */
 @media (max-width: 860px) {
   .app-layout {
     display: flex;
     flex-direction: column;
-    padding: 12px;
-    gap: 16px;
+    padding: var(--ui-gap);
+    gap: var(--ui-gap);
     width: 100%;
   }
 
-  /* 1. Lienzo arriba */
+  .main-column {
+    display: contents; /* Desempaqueta para ordenar los elementos libremente */
+  }
+
   #canvasSection {
     order: 1;
     width: 100%;
@@ -410,16 +408,14 @@ canvas {
     padding: 8px;
   }
 
-  /* 2. Ajustes inmediatamente debajo */
-  #sidebarSection {
+  .sidebar-wrapper {
     order: 2;
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: var(--ui-gap);
   }
 
-  /* 3. Tabla al final */
   #tableSection {
     order: 3;
     width: 100%;
