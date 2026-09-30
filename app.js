@@ -1,71 +1,188 @@
-// 1. Las 10 Telas Oficiales identificadas únicamente por su código de rol
-let fabrics = [
-  { id: "BG", name: "BG", hex: "#bc8a5f" },
-  { id: "A1", name: "A1", hex: "#d99b38" },
-  { id: "A2", name: "A2", hex: "#7a9cb8" },
-  { id: "A3", name: "A3", hex: "#e27863" },
-  { id: "B1", name: "B1", hex: "#cb4f69" },
-  { id: "B2", name: "B2", hex: "#e07a5f" },
-  { id: "B3", name: "B3", hex: "#9e4c27" },
-  { id: "C1", name: "C1", hex: "#2b4138" },
-  { id: "C2", name: "C2", hex: "#1d2a24" },
-  { id: "C3", name: "C3", hex: "#8c5e39" }
-];
+// --- CONFIGURACIÓN DE MODOS DE TARTÁN ---
+const MODES = {
+  3: {
+    name: "Gingham / Elemental (3 Tonos)",
+    desc: "2 colores base (A, B) → 2 tonos puros + 1 cruce (AB).",
+    bases: ["A", "B"],
+    roles: ["A", "B", "AB"],
+    resolve: (r, c) => (r === c ? r : "AB"),
+    seedCount: 2
+  },
+  6: {
+    name: "Tartán de Clan / Black Watch (6 Tonos)",
+    desc: "3 colores base (A, B, C) → 3 tonos puros + 3 cruces (AB, AC, BC).",
+    bases: ["A", "B", "C"],
+    roles: ["A", "B", "C", "AB", "AC", "BC"],
+    resolve: (r, c) => {
+      if (r === c) return r;
+      const pair = [r, c].sort().join("");
+      return pair;
+    },
+    seedCount: 3
+  },
+  10: {
+    name: "Royal Stewart / Petite Plaid (10 Tonos)",
+    desc: "4 colores base (BG, A1, B1, C1) → 4 tonos puros/solapados + 6 cruces intermedios.",
+    bases: ["BG", "A1", "B1", "C1"],
+    roles: ["BG", "A1", "A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3"],
+    resolve: (row, col) => {
+      if (row === "BG" && col === "BG") return "BG";
+      if (row === "BG") return col;
+      if (col === "BG") return row;
+      if (row === "A1" && col === "A1") return "A2";
+      if (row === "B1" && col === "B1") return "B2";
+      if (row === "C1" && col === "C1") return "C2";
+      const pair = [row, col].sort().join("+");
+      if (pair === "A1+B1") return "A3";
+      if (pair === "B1+C1") return "B3";
+      if (pair === "A1+C1") return "C3";
+      return "BG";
+    },
+    seedCount: 4
+  }
+};
 
-// Mapa de prioridades para mantener la tabla en orden estricto de roles
-const fabricOrderMap = fabrics.reduce((acc, f, index) => {
-  acc[f.id] = index;
-  return acc;
-}, {});
-
-let activeFabricId = "A1";
-
-// 2. Bandas del bloque en CENTÍMETROS (cm)
-let strips = [
-  { id: "BG", label: "Banda 1 (BG)", width: 6.5 },
-  { id: "A1", label: "Banda 2 (A1)", width: 2.5 },
-  { id: "BG", label: "Banda 3 (BG)", width: 7.5 },
-  { id: "B1", label: "Banda 4 (B1)", width: 4.0 },
-  { id: "BG", label: "Banda 5 (BG)", width: 6.5 },
-  { id: "C1", label: "Banda 6 (C1)", width: 5.0 }
-];
-
-// Matriz interna [fila][columna] = fabricId
+let currentMode = 10;
+let fabrics = [];
+let activeFabricId = "";
+let seedStrips = []; // Media secuencia
+let fullStrips = []; // Secuencia expandida en espejo
 let blockMatrix = [];
 
-// Regla de color de cruces oficial de Petite Plaid
-function resolveColorRole(rowStripId, colStripId) {
-  if (rowStripId === "BG" && colStripId === "BG") return "BG";
-  if (rowStripId === "BG") return colStripId;
-  if (colStripId === "BG") return rowStripId;
-
-  // Intersecciones del mismo grupo
-  if (rowStripId === "A1" && colStripId === "A1") return "A2";
-  if (rowStripId === "B1" && colStripId === "B1") return "B2";
-  if (rowStripId === "C1" && colStripId === "C1") return "C2";
-
-  // Intersecciones mixtas
-  const pair = [rowStripId, colStripId].sort().join("+");
-  if (pair === "A1+B1") return "A3";
-  if (pair === "B1+C1") return "B3";
-  if (pair === "A1+C1") return "C3";
-
-  return "BG";
+// Conversión HSL a HEX para generar colores coordinados
+function hslToHex(h, s, l) {
+  l /= 100;
+  const a = (s * Math.min(l, 1 - l)) / 100;
+  const f = n => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color).toString(16).padStart(2, "0");
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
 }
 
-function initializeMatrix() {
-  const n = strips.length;
+// Mezcla RGB para calcular tonos de intersección creíbles
+function blendHex(hex1, hex2, weight = 0.5) {
+  const c1 = parseInt(hex1.slice(1), 16);
+  const c2 = parseInt(hex2.slice(1), 16);
+  const r1 = (c1 >> 16) & 255, g1 = (c1 >> 8) & 255, b1 = c1 & 255;
+  const r2 = (c2 >> 16) & 255, g2 = (c2 >> 8) & 255, b2 = c2 & 255;
+  const r = Math.round(r1 * (1 - weight) + r2 * weight);
+  const g = Math.round(g1 * (1 - weight) + g2 * weight);
+  const b = Math.round(b1 * (1 - weight) + b2 * weight);
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+}
+
+// Generador aleatorio de paletas y proporciones de banda
+function generateRandomTartan(modeKey = currentMode) {
+  currentMode = modeKey;
+  const config = MODES[currentMode];
+  document.getElementById("modeDescription").textContent = config.desc;
+
+  // Actualizar botones segmentados
+  document.querySelectorAll(".seg-btn").forEach(btn => {
+    btn.classList.toggle("active", parseInt(btn.dataset.mode) === currentMode);
+  });
+
+  // 1. Generar paleta aleatoria armónica
+  const baseHue = Math.floor(Math.random() * 360);
+  const baseSaturation = 45 + Math.floor(Math.random() * 30); // 45% - 75%
+  const baseColors = {};
+
+  if (currentMode === 3) {
+    baseColors["A"] = hslToHex(baseHue, baseSaturation, 30);
+    baseColors["B"] = hslToHex((baseHue + 180) % 360, 20, 88); // Fondo claro
+    fabrics = [
+      { id: "A", name: "A", hex: baseColors["A"] },
+      { id: "B", name: "B", hex: baseColors["B"] },
+      { id: "AB", name: "AB", hex: blendHex(baseColors["A"], baseColors["B"], 0.45) }
+    ];
+  } else if (currentMode === 6) {
+    baseColors["A"] = hslToHex(baseHue, baseSaturation, 30);
+    baseColors["B"] = hslToHex((baseHue + 60) % 360, baseSaturation, 40);
+    baseColors["C"] = hslToHex((baseHue + 120) % 360, baseSaturation + 10, 20);
+    fabrics = [
+      { id: "A", name: "A", hex: baseColors["A"] },
+      { id: "B", name: "B", hex: baseColors["B"] },
+      { id: "C", name: "C", hex: baseColors["C"] },
+      { id: "AB", name: "AB", hex: blendHex(baseColors["A"], baseColors["B"], 0.5) },
+      { id: "AC", name: "AC", hex: blendHex(baseColors["A"], baseColors["C"], 0.5) },
+      { id: "BC", name: "BC", hex: blendHex(baseColors["B"], baseColors["C"], 0.5) }
+    ];
+  } else {
+    // 10 Tonos
+    baseColors["BG"] = hslToHex(baseHue, 35, 75); // Fondo
+    baseColors["A1"] = hslToHex((baseHue + 45) % 360, 65, 50);
+    baseColors["B1"] = hslToHex((baseHue + 150) % 360, 60, 42);
+    baseColors["C1"] = hslToHex((baseHue + 260) % 360, 50, 25);
+
+    fabrics = [
+      { id: "BG", name: "BG", hex: baseColors["BG"] },
+      { id: "A1", name: "A1", hex: baseColors["A1"] },
+      { id: "A2", name: "A2", hex: blendHex(baseColors["A1"], "#000000", 0.3) },
+      { id: "A3", name: "A3", hex: blendHex(baseColors["A1"], baseColors["B1"], 0.5) },
+      { id: "B1", name: "B1", hex: baseColors["B1"] },
+      { id: "B2", name: "B2", hex: blendHex(baseColors["B1"], "#000000", 0.3) },
+      { id: "B3", name: "B3", hex: blendHex(baseColors["B1"], baseColors["C1"], 0.5) },
+      { id: "C1", name: "C1", hex: baseColors["C1"] },
+      { id: "C2", name: "C2", hex: blendHex(baseColors["C1"], "#000000", 0.4) },
+      { id: "C3", name: "C3", hex: blendHex(baseColors["A1"], baseColors["C1"], 0.5) }
+    ];
+  }
+
+  activeFabricId = fabrics[0].id;
+
+  // 2. Generar medidas de bandas semilla (en cm) con proporciones de tartán real
+  seedStrips = [];
+  const sampleWidths = [2.0, 2.5, 3.5, 5.0, 6.5, 8.0];
+  for (let i = 0; i < config.bases.length; i++) {
+    const w = sampleWidths[Math.floor(Math.random() * sampleWidths.length)];
+    seedStrips.push({
+      id: config.bases[i],
+      label: `Banda Base (${config.bases[i]})`,
+      width: w
+    });
+  }
+
+  // Si hay pocas bases, añadimos una franja de acento para enriquecer el bloque
+  if (seedStrips.length < 4) {
+    const extraBase = config.bases[0];
+    seedStrips.push({
+      id: extraBase,
+      label: `Acento (${extraBase})`,
+      width: 2.0
+    });
+  }
+
+  rebuildMirroredSett();
+}
+
+// 3. Expansión simétrica en espejo (Sett Simétrico Tradicional)
+function rebuildMirroredSett() {
+  const config = MODES[currentMode];
+  // Si la semilla es [S0, S1, S2, S3], el espejo genera: [S0, S1, S2, S3, S2, S1]
+  fullStrips = [...seedStrips];
+  for (let i = seedStrips.length - 2; i >= 1; i--) {
+    fullStrips.push({ ...seedStrips[i] });
+  }
+
+  // Construir matriz simétrica
+  const n = fullStrips.length;
   blockMatrix = [];
   for (let r = 0; r < n; r++) {
     const row = [];
     for (let c = 0; c < n; c++) {
-      row.push(resolveColorRole(strips[r].id, strips[c].id));
+      row.push(config.resolve(fullStrips[r].id, fullStrips[c].id));
     }
     blockMatrix.push(row);
   }
+
+  renderPalette();
+  renderStripControls();
+  updateAll();
 }
 
-// UI: Paleta con códigos limpios
+// UI: Paleta de telas
 function renderPalette() {
   const container = document.getElementById("palette");
   container.innerHTML = fabrics.map(f => `
@@ -95,27 +212,27 @@ function changeColorHex(id, hex) {
   updateAll();
 }
 
-// UI: Controles de bandas en cm
+// UI: Controles de bandas semilla (editables en cm)
 function renderStripControls() {
   const container = document.getElementById("stripControls");
-  container.innerHTML = strips.map((s, idx) => `
+  container.innerHTML = seedStrips.map((s, idx) => `
     <div class="strip-item">
       <span>${s.label}</span>
       <div class="strip-inputs">
         <input type="number" step="0.5" min="0.5" value="${s.width}" 
-               onchange="updateStripWidth(${idx}, parseFloat(this.value))" />
+               onchange="updateSeedWidth(${idx}, parseFloat(this.value))" />
         <span style="color: var(--text-secondary); font-size: 0.75rem;">cm</span>
       </div>
     </div>
   `).join("");
 }
 
-function updateStripWidth(idx, val) {
-  strips[idx].width = isNaN(val) || val <= 0 ? 1.0 : val;
-  updateAll();
+function updateSeedWidth(idx, val) {
+  seedStrips[idx].width = isNaN(val) || val <= 0 ? 1.0 : val;
+  rebuildMirroredSett();
 }
 
-// Dibujar Canvas y actualizar medidas de Bloque y Quilt
+// Dibujo Canvas
 function drawCanvas() {
   const canvas = document.getElementById("quiltCanvas");
   const ctx = canvas.getContext("2d");
@@ -127,7 +244,7 @@ function drawCanvas() {
   document.getElementById("blocksSummaryText").textContent = 
     `Total: ${totalBlocks} bloque${totalBlocks > 1 ? 's' : ''} (${repX} × ${repY})`;
 
-  const blockDimCm = strips.reduce((acc, s) => acc + s.width, 0);
+  const blockDimCm = fullStrips.reduce((acc, s) => acc + s.width, 0);
   const totalWCm = blockDimCm * repX;
   const totalHCm = blockDimCm * repY;
 
@@ -146,12 +263,12 @@ function drawCanvas() {
     for (let bx = 0; bx < repX; bx++) {
       let offsetY = by * blockDimCm * pxPerCm;
 
-      for (let r = 0; r < strips.length; r++) {
-        const rowH = strips[r].width * pxPerCm;
+      for (let r = 0; r < fullStrips.length; r++) {
+        const rowH = fullStrips[r].width * pxPerCm;
         let offsetX = bx * blockDimCm * pxPerCm;
 
-        for (let c = 0; c < strips.length; c++) {
-          const colW = strips[c].width * pxPerCm;
+        for (let c = 0; c < fullStrips.length; c++) {
+          const colW = fullStrips[c].width * pxPerCm;
           const fabricId = blockMatrix[r][c];
           const fabric = fabrics.find(f => f.id === fabricId) || fabrics[0];
 
@@ -170,7 +287,7 @@ function drawCanvas() {
   }
 }
 
-// Interacción por clic en celda
+// Clic interactivo en celda
 document.getElementById("quiltCanvas").addEventListener("click", function (evt) {
   const rect = this.getBoundingClientRect();
   const clickX = evt.clientX - rect.left;
@@ -178,35 +295,35 @@ document.getElementById("quiltCanvas").addEventListener("click", function (evt) 
 
   const repX = parseInt(document.getElementById("repeatX").value) || 2;
   const repY = parseInt(document.getElementById("repeatY").value) || 2;
-  const blockDimCm = strips.reduce((acc, s) => acc + s.width, 0);
+  const blockDimCm = fullStrips.reduce((acc, s) => acc + s.width, 0);
   const pxPerCm = Math.min(520 / (blockDimCm * repX), 520 / (blockDimCm * repY));
 
   const xInCm = (clickX / pxPerCm) % blockDimCm;
   const yInCm = (clickY / pxPerCm) % blockDimCm;
 
   let accumX = 0, targetCol = 0;
-  for (let c = 0; c < strips.length; c++) {
-    if (xInCm >= accumX && xInCm < accumX + strips[c].width) {
+  for (let c = 0; c < fullStrips.length; c++) {
+    if (xInCm >= accumX && xInCm < accumX + fullStrips[c].width) {
       targetCol = c;
       break;
     }
-    accumX += strips[c].width;
+    accumX += fullStrips[c].width;
   }
 
   let accumY = 0, targetRow = 0;
-  for (let r = 0; r < strips.length; r++) {
-    if (yInCm >= accumY && yInCm < accumY + strips[r].width) {
+  for (let r = 0; r < fullStrips.length; r++) {
+    if (yInCm >= accumY && yInCm < accumY + fullStrips[r].width) {
       targetRow = r;
       break;
     }
-    accumY += strips[r].width;
+    accumY += fullStrips[r].width;
   }
 
   blockMatrix[targetRow][targetCol] = activeFabricId;
   updateAll();
 });
 
-// Despiece métrico ordenado y etiquetado solo por código de rol
+// Despiece métrico ordenado según los roles
 function calculateCuts() {
   const seamCm = parseFloat(document.getElementById("seamAllowance").value) || 0.75;
   const repX = parseInt(document.getElementById("repeatX").value) || 2;
@@ -215,12 +332,12 @@ function calculateCuts() {
 
   const pieces = {};
 
-  for (let r = 0; r < strips.length; r++) {
-    for (let c = 0; c < strips.length; c++) {
+  for (let r = 0; r < fullStrips.length; r++) {
+    for (let c = 0; c < fullStrips.length; c++) {
       const fabricId = blockMatrix[r][c];
       
-      const wFinCm = strips[c].width;
-      const hFinCm = strips[r].width;
+      const wFinCm = fullStrips[c].width;
+      const hFinCm = fullStrips[r].width;
 
       const sortedFinCm = [wFinCm, hFinCm].sort((a, b) => a - b);
       const cutDimsCm = sortedFinCm.map(dim => dim + 2 * seamCm);
@@ -241,10 +358,15 @@ function calculateCuts() {
     }
   }
 
+  const roleOrder = fabrics.reduce((acc, f, idx) => {
+    acc[f.id] = idx;
+    return acc;
+  }, {});
+
   const sortedPieces = Object.values(pieces).sort((a, b) => {
-    const orderA = fabricOrderMap[a.fabricId] !== undefined ? fabricOrderMap[a.fabricId] : 999;
-    const orderB = fabricOrderMap[b.fabricId] !== undefined ? fabricOrderMap[b.fabricId] : 999;
-    if (orderA !== orderB) return orderA - orderB;
+    const oA = roleOrder[a.fabricId] ?? 999;
+    const oB = roleOrder[b.fabricId] ?? 999;
+    if (oA !== oB) return oA - oB;
     if (a.dimW !== b.dimW) return a.dimW - b.dimW;
     return a.dimH - b.dimH;
   });
@@ -274,13 +396,22 @@ function updateAll() {
   calculateCuts();
 }
 
-// Event Listeners
+// Botones segmentados de selección de modo
+document.querySelectorAll(".seg-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    generateRandomTartan(parseInt(btn.dataset.mode));
+  });
+});
+
+// Botón de aleatoriedad
+document.getElementById("btnRandomize").addEventListener("click", () => {
+  generateRandomTartan(currentMode);
+});
+
+// Listeners de parámetros
 document.getElementById("seamAllowance").addEventListener("input", updateAll);
 document.getElementById("repeatX").addEventListener("input", updateAll);
 document.getElementById("repeatY").addEventListener("input", updateAll);
 
-// Inicializar
-initializeMatrix();
-renderPalette();
-renderStripControls();
-updateAll();
+// Inicializar de forma aleatoria al cargar la página
+generateRandomTartan(10);

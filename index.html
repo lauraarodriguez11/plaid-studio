@@ -12,13 +12,13 @@
 </head>
 <body>
 
-  <!-- Barra superior -->
   <header class="app-header">
     <div class="header-inner">
       <div class="brand">
         <h1>Plaid Studio</h1>
       </div>
-      <div class="header-meta">
+      <div class="header-actions">
+        <button id="btnRandomize" class="btn-random">🎲 Generar Tartán Aleatorio</button>
         <a href="https://www.loandbeholdstitchery.com/blogs/lo-and-behold/petite-plaid-quilt-pattern-all-the-details?utm_source=Pinterest&utm_medium=organic" 
            target="_blank" 
            rel="noopener noreferrer" 
@@ -30,34 +30,45 @@
     </div>
   </header>
 
-  <!-- Espacio de trabajo -->
   <main class="app-layout">
     
     <aside class="sidebar">
       
-      <!-- Color Key -->
+      <!-- Selector de Modo de Tonos -->
       <section class="card">
         <div class="card-header">
-          <h2>Color Key (10 Telas)</h2>
+          <h2>Modo de Tartán</h2>
+        </div>
+        <div class="segmented-control">
+          <button class="seg-btn" data-mode="3">3 Tonos (Gingham)</button>
+          <button class="seg-btn" data-mode="6">6 Tonos (Clan)</button>
+          <button class="seg-btn active" data-mode="10">10 Tonos (Stewart)</button>
+        </div>
+        <p class="formula-info" id="modeDescription"></p>
+      </section>
+
+      <!-- Paleta y Roles de Color -->
+      <section class="card">
+        <div class="card-header">
+          <h2>Paleta y Roles de Color</h2>
           <span class="hint-pill">Clic para activar</span>
         </div>
-        <p class="formula-info">
-          A1+A1=A2 | B1+B1=B2 | C1+C1=C2<br>
-          A1+B1=A3 | B1+C1=B3 | A1+C1=C3
-        </p>
         <div id="palette" class="palette-grid"></div>
       </section>
 
-      <!-- Bandas del bloque en cm -->
+      <!-- Bandas del bloque en espejo -->
       <section class="card">
         <div class="card-header">
-          <h2>Bandas del Bloque</h2>
+          <h2>Semilla de Bandas (Mitad de Bloque)</h2>
           <span class="subtext">Medidas en cm</span>
         </div>
+        <p class="hint-pill" style="display:block; margin-bottom:8px;">
+          Se refleja automáticamente en espejo para formar el sett simétrico real.
+        </p>
         <div id="stripControls" class="strip-list"></div>
       </section>
 
-      <!-- Ajustes del Quilt -->
+      <!-- Configuración del Quilt -->
       <section class="card">
         <div class="card-header">
           <h2>Configuración del Quilt</h2>
@@ -85,7 +96,6 @@
 
     <section class="canvas-stage">
       
-      <!-- Canvas interactivo -->
       <div class="card canvas-card">
         <div class="canvas-toolbar">
           <div>
@@ -100,7 +110,7 @@
         </div>
       </div>
 
-      <!-- Plan de corte en cm -->
+      <!-- Plan de corte -->
       <div class="card table-card">
         <div class="card-header">
           <h2>Plan de Corte de Piezas (cm)</h2>
@@ -125,7 +135,6 @@
 
   </main>
 
-  <!-- Parámetro de versión para forzar actualización de caché -->
-  <script src="app.js?v=4.0"></script>
+  <script src="app.js?v=5.0"></script>
 </body>
 </html>

@@ -33,7 +33,7 @@ body {
   -webkit-backdrop-filter: blur(20px);
   background: rgba(245, 245, 247, 0.85);
   border-bottom: 1px solid var(--border-light);
-  padding: 14px 32px;
+  padding: 12px 32px;
 }
 
 .header-inner {
@@ -62,6 +62,30 @@ body {
   font-weight: 600;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-random {
+  background: #ffffff;
+  color: var(--text-main);
+  border: 1px solid var(--border-light);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  transition: all 0.15s ease;
+}
+
+.btn-random:hover {
+  background: #f0f0f2;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
 .badge-link {
   font-size: 0.78rem;
   font-weight: 500;
@@ -71,9 +95,6 @@ body {
   border-radius: 20px;
   text-decoration: none;
   transition: all 0.15s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
 }
 
 .badge-link:hover {
@@ -114,6 +135,36 @@ body {
   font-weight: 600;
 }
 
+/* Control segmentado Apple */
+.segmented-control {
+  display: flex;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 3px;
+  border-radius: 10px;
+  gap: 2px;
+  margin-bottom: 10px;
+}
+
+.seg-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-main);
+  padding: 6px 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.seg-btn.active {
+  background: #ffffff;
+  color: var(--text-main);
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
 .formula-info {
   font-size: 0.72rem;
   color: var(--text-secondary);
@@ -133,7 +184,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 290px;
+  max-height: 260px;
   overflow-y: auto;
 }
 
