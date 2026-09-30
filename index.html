@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Plaid Studio</title>
+  <title>Wenyers's Plaid Studio</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,14 +12,14 @@
 </head>
 <body>
 
-  <!-- Cabecera limpia sin círculo ni enlaces externos -->
+  <!-- Cabecera -->
   <header class="app-header">
     <div class="header-inner">
       <div class="brand">
-        <h1>Plaid Studio</h1>
+        <h1>Wenyers's Plaid Studio</h1>
       </div>
       <div class="header-actions">
-        <button id="btnRandomize" class="btn-random">🎲 Generar Tartán Aleatorio</button>
+        <button id="btnRandomize" class="btn-random">Generar Tartán Aleatorio</button>
       </div>
     </div>
   </header>
@@ -99,7 +99,7 @@
           <div class="zoom-indicator" id="blockSizeDisplay">Bloque: -- cm</div>
         </div>
         
-        <div class="canvas-viewport">
+        <div class="canvas-viewport" id="canvasViewport">
           <canvas id="quiltCanvas"></canvas>
         </div>
       </div>
@@ -129,6 +129,6 @@
 
   </main>
 
-  <script src="app.js?v=7.0"></script>
+  <script src="app.js?v=8.0"></script>
 </body>
 </html>
